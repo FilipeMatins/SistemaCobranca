@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerador de Ícones PWA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 { color: #3b82f6; }
+        .icons { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 20px 0; }
+        .icon-box { background: #1e293b; padding: 15px; border-radius: 10px; }
+        .icon-box img { display: block; margin: 10px auto; }
+        .icon-box p { margin: 5px 0; font-size: 12px; color: #94a3b8; }
+        button {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover { background: #2563eb; }
+        .instructions {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: left;
+        }
+        .instructions h3 { color: #3b82f6; margin-top: 0; }
+        .instructions ol { color: #cbd5e1; }
+        canvas { display: none; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Gerador de Ícones PWA</h1>
+    
+    <div class="instructions">
+        <h3>📱 Instruções:</h3>
+        <ol>
+            <li>Clique em "Gerar Todos os Ícones"</li>
+            <li>Salve cada ícone na pasta <code>assets/icons/</code></li>
+            <li>Depois acesse o sistema normalmente</li>
+        </ol>
+    </div>
+    
+    <button onclick="generateAll()">🎨 Gerar Todos os Ícones</button>
+    <button onclick="downloadAll()">⬇️ Baixar Todos (ZIP)</button>
+    
+    <div class="icons" id="icons"></div>
+    
+    <canvas id="canvas"></canvas>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        const icons = {};
+        
+        function generateIcon(size) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Fundo azul com gradiente
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#3b82f6');
+            gradient.addColorStop(1, '#1d4ed8');
+            ctx.fillStyle = gradient;
+            
+            // Bordas arredondadas
+            const radius = size * 0.2;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(size - radius, 0);
+            ctx.quadraticCurveTo(size, 0, size, radius);
+            ctx.lineTo(size, size - radius);
+            ctx.quadraticCurveTo(size, size, size - radius, size);
+            ctx.lineTo(radius, size);
+            ctx.quadraticCurveTo(0, size, 0, size - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Símbolo $
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${size * 0.6}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('$', size / 2, size / 2);
+            
+            return canvas.toDataURL('image/png');
+        }
+        
+        function generateAll() {
+            const container = document.getElementById('icons');
+            container.innerHTML = '';
+            
+            sizes.forEach(size => {
+                const dataUrl = generateIcon(size);
+                icons[size] = dataUrl;
+                
+                const box = document.createElement('div');
+                box.className = 'icon-box';
+                box.innerHTML = `
+                    <img src="${dataUrl}" width="${Math.min(size, 128)}" height="${Math.min(size, 128)}">
+                    <p>icon-${size}.png</p>
+                    <a href="${dataUrl}" download="icon-${size}.png">
+                        <button style="padding: 8px 15px; font-size: 12px;">⬇️ Baixar</button>
+                    </a>
+                `;
+                container.appendChild(box);
+            });
+        }
+        
+        async function downloadAll() {
+            if (Object.keys(icons).length === 0) {
+                generateAll();
+            }
+            
+            const zip = new JSZip();
+            const folder = zip.folder('icons');
+            
+            for (const [size, dataUrl] of Object.entries(icons)) {
+                const base64 = dataUrl.split(',')[1];
+                folder.file(`icon-${size}.png`, base64, { base64: true });
+            }
+            
+            const blob = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pwa-icons.zip';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Gera automaticamente ao carregar
+        generateAll();
+    </script>
+</body>
+</html>
+

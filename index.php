@@ -2,11 +2,46 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>📝 Bloco de Cobranças</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Sistema de gerenciamento de cobranças e notinhas">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cobranças">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#3b82f6">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="assets/icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/icons/icon-72.png">
+    <link rel="apple-touch-icon" sizes="96x96" href="assets/icons/icon-96.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="assets/icons/icon-128.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/icons/icon-144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="384x384" href="assets/icons/icon-384.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="assets/icons/icon-512.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/icon-72.png">
+    
+    <!-- Splash Screens iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="assets/css/app.css">
 </head>
 <body>
@@ -422,5 +457,51 @@
     <div class="toast" id="toast"></div>
 
     <script src="assets/js/app.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registrado:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ Falha ao registrar Service Worker:', error);
+                    });
+            });
+        }
+        
+        // Prompt de instalação PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Mostra botão de instalar se não estiver instalado
+            const btnInstalar = document.getElementById('btn-instalar-app');
+            if (btnInstalar) {
+                btnInstalar.style.display = 'block';
+            }
+        });
+        
+        function instalarApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('✅ App instalado');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+        
+        // Detecta se está rodando como PWA
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('📱 Rodando como PWA instalado');
+            document.body.classList.add('pwa-mode');
+        }
+    </script>
 </body>
 </html>
