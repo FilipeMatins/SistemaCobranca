@@ -1,63 +1,38 @@
 <?php
-// API de Empresas
-header('Content-Type: application/json; charset=utf-8');
+/**
+ * API de Empresas
+ * Roteador para EmpresaController
+ */
+
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-require_once __DIR__ . '/../config/database.php';
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
 
+require_once __DIR__ . '/../app/autoload.php';
+
+use App\Controllers\EmpresaController;
+use App\Core\Response;
+
+$controller = new EmpresaController();
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {
-    $pdo = getConnection();
-
     switch ($method) {
         case 'GET':
-            // Buscar empresas (autocomplete)
-            $termo = $_GET['termo'] ?? '';
-            
-            if ($termo) {
-                $stmt = $pdo->prepare("SELECT id, nome FROM empresas WHERE nome LIKE ? ORDER BY nome LIMIT 10");
-                $stmt->execute(["%$termo%"]);
-            } else {
-                $stmt = $pdo->query("SELECT id, nome FROM empresas ORDER BY nome");
-            }
-            
-            jsonResponse($stmt->fetchAll());
+            $controller->index();
             break;
-
+            
         case 'POST':
-            // Criar ou buscar empresa existente
-            $data = json_decode(file_get_contents('php://input'), true);
-            $nome = trim($data['nome'] ?? '');
-
-            if (empty($nome)) {
-                jsonResponse(['error' => 'Nome da empresa é obrigatório'], 400);
-            }
-
-            // Verifica se já existe
-            $stmt = $pdo->prepare("SELECT id, nome FROM empresas WHERE nome = ?");
-            $stmt->execute([$nome]);
-            $empresa = $stmt->fetch();
-
-            if ($empresa) {
-                jsonResponse($empresa);
-            }
-
-            // Cria nova empresa
-            $stmt = $pdo->prepare("INSERT INTO empresas (nome) VALUES (?)");
-            $stmt->execute([$nome]);
-            
-            jsonResponse([
-                'id' => $pdo->lastInsertId(),
-                'nome' => $nome
-            ], 201);
+            $controller->store();
             break;
-
+            
         default:
-            jsonResponse(['error' => 'Método não permitido'], 405);
+            Response::methodNotAllowed();
     }
 } catch (Exception $e) {
-    jsonResponse(['error' => $e->getMessage()], 500);
+    Response::error($e->getMessage(), 500);
 }
