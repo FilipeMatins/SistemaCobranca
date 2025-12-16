@@ -1000,7 +1000,7 @@ async function carregarTodosClientes() {
         const response = await fetch('api/clientes.php');
         todosClientes = await response.json();
         clientesFiltrados = [...todosClientes];
-        renderizarClientes();
+        renderizarListaClientes();
         atualizarBadgeClientes();
     } catch (error) {
         console.error('Erro:', error);
@@ -1017,8 +1017,9 @@ function atualizarBadgeClientes() {
     }
 }
 
-function renderizarClientes() {
+function renderizarListaClientes() {
     const container = document.getElementById('clientes-grid');
+    if (!container) return; // Evita erro se não estiver na aba
     
     if (clientesFiltrados.length === 0) {
         container.innerHTML = `
@@ -1061,7 +1062,7 @@ function filtrarClientes() {
         c.nome.toLowerCase().includes(termo) || 
         (c.telefone && c.telefone.includes(termo))
     );
-    renderizarClientes();
+    renderizarListaClientes();
 }
 
 function abrirModalCliente(id = null) {

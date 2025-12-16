@@ -43,11 +43,21 @@ try {
                 jsonResponse(['error' => 'Nome é obrigatório'], 400);
             }
 
-            // Verifica se já existe
+            // Verifica se nome já existe
             $stmt = $pdo->prepare("SELECT id FROM clientes WHERE nome = ?");
             $stmt->execute([$nome]);
             if ($stmt->fetch()) {
                 jsonResponse(['error' => 'Cliente já cadastrado com este nome'], 400);
+            }
+
+            // Verifica se telefone já existe em outro cliente
+            if (!empty($telefone)) {
+                $stmt = $pdo->prepare("SELECT nome FROM clientes WHERE telefone = ?");
+                $stmt->execute([$telefone]);
+                $clienteExistente = $stmt->fetch();
+                if ($clienteExistente) {
+                    jsonResponse(['error' => 'Este telefone já está cadastrado para: ' . $clienteExistente['nome']], 400);
+                }
             }
 
             // Cria novo cliente
@@ -78,6 +88,16 @@ try {
             $stmt->execute([$nome, $id]);
             if ($stmt->fetch()) {
                 jsonResponse(['error' => 'Já existe outro cliente com este nome'], 400);
+            }
+
+            // Verifica se telefone já existe em outro cliente
+            if (!empty($telefone)) {
+                $stmt = $pdo->prepare("SELECT nome FROM clientes WHERE telefone = ? AND id != ?");
+                $stmt->execute([$telefone, $id]);
+                $clienteExistente = $stmt->fetch();
+                if ($clienteExistente) {
+                    jsonResponse(['error' => 'Este telefone já está cadastrado para: ' . $clienteExistente['nome']], 400);
+                }
             }
 
             $stmt = $pdo->prepare("UPDATE clientes SET nome = ?, telefone = ? WHERE id = ?");
