@@ -1021,7 +1021,7 @@ function atualizarBadgeClientes() {
 }
 
 function renderizarListaClientes() {
-    const container = document.getElementById('clientes-lista');
+    const container = document.getElementById('clientes-cadastrados-lista');
     if (!container) return;
     
     if (clientesFiltrados.length === 0) {
@@ -1124,7 +1124,7 @@ function mudarPaginaClientes(pagina) {
     renderizarListaClientes();
     
     // Scroll para o topo da lista
-    document.getElementById('clientes-lista-container')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('clientes-cadastrados-container')?.scrollIntoView({ behavior: 'smooth' });
 }
 
 function formatarTelefone(tel) {

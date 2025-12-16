@@ -14,3 +14,8 @@ Thumbs.db
 # Temp
 *.tmp
 *.temp
+
+# Dados sensíveis de clientes
+insert_*.sql
+contatos_temp.txt
+extract_contacts.py

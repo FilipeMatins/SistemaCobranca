@@ -157,13 +157,13 @@
                 <input type="text" class="filtro-busca" id="filtro-clientes" placeholder="🔍 Buscar cliente..." oninput="filtrarClientes()">
             </div>
 
-            <div class="clientes-lista" id="clientes-lista-container">
+            <div class="clientes-lista" id="clientes-cadastrados-container">
                 <div class="clientes-lista-header">
                     <span>Nome</span>
                     <span>Telefone</span>
                     <span>Ações</span>
                 </div>
-                <div id="clientes-lista">
+                <div id="clientes-cadastrados-lista">
                     <!-- Lista de clientes será carregada aqui -->
                 </div>
             </div>
