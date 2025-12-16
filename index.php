@@ -67,6 +67,7 @@
         <div class="tabs">
             <button class="tab active" data-tab="nova">➕ Nova</button>
             <button class="tab" data-tab="lista">📋 Notinhas</button>
+            <button class="tab" data-tab="clientes">👥 Clientes <span class="badge" id="badge-clientes"></span></button>
             <button class="tab" data-tab="excluidos">🗑️ Excluídos <span class="badge" id="badge-excluidos"></span></button>
         </div>
 
@@ -139,6 +140,25 @@
             <!-- Total Filtrado -->
             <div class="total-filtrado" id="total-filtrado">
                 <span>Total exibido: <strong id="valor-filtrado">R$ 0,00</strong></span>
+            </div>
+        </div>
+
+        <!-- Clientes -->
+        <div id="tab-clientes" class="tab-content" style="display: none;">
+            <div class="clientes-header-section">
+                <div class="clientes-acoes">
+                    <button class="btn-novo-cliente" onclick="abrirModalCliente()">
+                        ➕ Novo Cliente
+                    </button>
+                    <button class="btn-promocao" onclick="abrirModalPromocao()">
+                        📢 Enviar Promoção
+                    </button>
+                </div>
+                <input type="text" class="filtro-busca" id="filtro-clientes" placeholder="🔍 Buscar cliente..." oninput="filtrarClientes()">
+            </div>
+
+            <div class="clientes-grid" id="clientes-grid">
+                <!-- Lista de clientes será carregada aqui -->
             </div>
         </div>
 
@@ -240,7 +260,7 @@
     <div class="modal-overlay" id="modal-cobranca">
         <div class="modal modal-cobranca">
             <div class="cobranca-header">
-                <h2>💬 Enviar Cobranças</h2>
+                <h2 id="titulo-modal-cobranca">💬 Enviar Cobranças</h2>
                 <span class="cobranca-progresso" id="cobranca-progresso">1 de 5</span>
             </div>
             
@@ -252,6 +272,7 @@
                 <div class="cobranca-info">
                     <span class="cobranca-label">Cliente</span>
                     <span class="cobranca-nome" id="cobranca-nome">Maria Silva</span>
+                    <span class="badge-reenvio" id="badge-reenvio" style="display: none;">🔄 Reenvio</span>
                 </div>
                 <div class="cobranca-info">
                     <span class="cobranca-label">Valor</span>
@@ -282,6 +303,107 @@
             </div>
 
             <button class="btn-fechar-cobranca" onclick="fecharModalCobranca()">✕ Fechar</button>
+        </div>
+    </div>
+
+    <!-- Modal Novo/Editar Cliente -->
+    <div class="modal-overlay" id="modal-cliente">
+        <div class="modal" style="max-width: 400px;">
+            <h2 id="titulo-modal-cliente">➕ Novo Cliente</h2>
+            
+            <input type="hidden" id="cliente-id">
+            
+            <div class="form-group">
+                <label>Nome Completo</label>
+                <input type="text" id="cliente-nome" placeholder="Nome e sobrenome">
+            </div>
+
+            <div class="form-group">
+                <label>Telefone (WhatsApp)</label>
+                <input type="text" id="cliente-telefone" placeholder="67999999999">
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn-cancelar" onclick="fecharModalCliente()">Cancelar</button>
+                <button class="btn-salvar-config" onclick="salvarCliente()">💾 Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Promoção -->
+    <div class="modal-overlay" id="modal-promocao">
+        <div class="modal" style="max-width: 550px;">
+            <h2>📢 Enviar Promoção</h2>
+            
+            <div class="form-group">
+                <label>Mensagem da Promoção</label>
+                <textarea id="promocao-mensagem" rows="5" placeholder="Digite a mensagem da promoção..."></textarea>
+            </div>
+
+            <div class="info-box">
+                💡 <strong>Variável disponível:</strong><br>
+                <code>{nome}</code> = Primeiro nome do cliente
+            </div>
+
+            <div class="promocao-seletor">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="selecionar-todos-clientes" onchange="toggleSelecionarTodosClientes()">
+                    <span class="checkmark"></span>
+                    Selecionar todos (<span id="total-clientes-selecionados">0</span> clientes)
+                </label>
+            </div>
+
+            <div class="promocao-lista" id="promocao-lista-clientes">
+                <!-- Lista de clientes com checkbox -->
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn-cancelar" onclick="fecharModalPromocao()">Cancelar</button>
+                <button class="btn-enviar-promocao" onclick="iniciarEnvioPromocao()">
+                    📢 Enviar para Selecionados
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Envio Promoção -->
+    <div class="modal-overlay" id="modal-envio-promocao">
+        <div class="modal modal-cobranca">
+            <div class="cobranca-header">
+                <h2>📢 Enviando Promoção</h2>
+                <span class="cobranca-progresso" id="promocao-progresso">1 de 5</span>
+            </div>
+            
+            <div class="cobranca-barra-container">
+                <div class="cobranca-barra" id="promocao-barra"></div>
+            </div>
+
+            <div class="cobranca-cliente">
+                <div class="cobranca-info">
+                    <span class="cobranca-label">Cliente</span>
+                    <span class="cobranca-nome" id="promocao-nome">Maria Silva</span>
+                </div>
+                <div class="cobranca-info">
+                    <span class="cobranca-label">Telefone</span>
+                    <span class="cobranca-telefone" id="promocao-telefone">(67) 99999-9999</span>
+                </div>
+            </div>
+
+            <div class="cobranca-instrucao">
+                👆 Clique em <strong>Enviar</strong> → WhatsApp abre → Aperte <strong>Enter</strong> → Volte aqui
+            </div>
+
+            <div class="cobranca-botoes">
+                <button class="btn-pular" onclick="pularPromocaoAtual()">Pular</button>
+                <button class="btn-enviar-cobranca" id="btn-enviar-promocao" onclick="enviarPromocaoAtual()">
+                    💬 Enviar no WhatsApp
+                </button>
+                <button class="btn-proximo" id="btn-proximo-promocao" onclick="proximaPromocao()" style="display: none;">
+                    ✓ Enviado! Próximo →
+                </button>
+            </div>
+
+            <button class="btn-fechar-cobranca" onclick="fecharModalEnvioPromocao()">✕ Fechar</button>
         </div>
     </div>
 

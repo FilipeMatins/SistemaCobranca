@@ -2,8 +2,12 @@
 // API de Clientes Cadastrados
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit(0);
+}
 
 require_once __DIR__ . '/../config/database.php';
 
@@ -14,21 +18,23 @@ try {
 
     switch ($method) {
         case 'GET':
-            // Buscar clientes (autocomplete)
+            // Buscar clientes (autocomplete ou listagem completa)
             $termo = $_GET['termo'] ?? '';
+            $todos = isset($_GET['todos']); // Se passar ?todos lista todos
             
             if ($termo) {
                 $stmt = $pdo->prepare("SELECT id, nome, telefone FROM clientes WHERE nome LIKE ? ORDER BY nome LIMIT 10");
                 $stmt->execute(["%$termo%"]);
             } else {
-                $stmt = $pdo->query("SELECT id, nome, telefone FROM clientes ORDER BY nome LIMIT 50");
+                // Lista todos os clientes ordenados por nome
+                $stmt = $pdo->query("SELECT id, nome, telefone FROM clientes ORDER BY nome");
             }
             
             jsonResponse($stmt->fetchAll());
             break;
 
         case 'POST':
-            // Criar ou atualizar cliente
+            // Criar cliente
             $data = json_decode(file_get_contents('php://input'), true);
             $nome = trim($data['nome'] ?? '');
             $telefone = trim($data['telefone'] ?? '');
@@ -38,18 +44,10 @@ try {
             }
 
             // Verifica se já existe
-            $stmt = $pdo->prepare("SELECT id, nome, telefone FROM clientes WHERE nome = ?");
+            $stmt = $pdo->prepare("SELECT id FROM clientes WHERE nome = ?");
             $stmt->execute([$nome]);
-            $cliente = $stmt->fetch();
-
-            if ($cliente) {
-                // Atualiza telefone se mudou
-                if ($telefone && $telefone !== $cliente['telefone']) {
-                    $stmt = $pdo->prepare("UPDATE clientes SET telefone = ? WHERE id = ?");
-                    $stmt->execute([$telefone, $cliente['id']]);
-                    $cliente['telefone'] = $telefone;
-                }
-                jsonResponse($cliente);
+            if ($stmt->fetch()) {
+                jsonResponse(['error' => 'Cliente já cadastrado com este nome'], 400);
             }
 
             // Cria novo cliente
@@ -57,10 +55,49 @@ try {
             $stmt->execute([$nome, $telefone]);
             
             jsonResponse([
+                'success' => true,
                 'id' => $pdo->lastInsertId(),
                 'nome' => $nome,
                 'telefone' => $telefone
             ], 201);
+            break;
+
+        case 'PUT':
+            // Atualizar cliente
+            $data = json_decode(file_get_contents('php://input'), true);
+            $id = intval($data['id'] ?? 0);
+            $nome = trim($data['nome'] ?? '');
+            $telefone = trim($data['telefone'] ?? '');
+
+            if (!$id || empty($nome)) {
+                jsonResponse(['error' => 'ID e nome são obrigatórios'], 400);
+            }
+
+            // Verifica se nome já existe em outro cliente
+            $stmt = $pdo->prepare("SELECT id FROM clientes WHERE nome = ? AND id != ?");
+            $stmt->execute([$nome, $id]);
+            if ($stmt->fetch()) {
+                jsonResponse(['error' => 'Já existe outro cliente com este nome'], 400);
+            }
+
+            $stmt = $pdo->prepare("UPDATE clientes SET nome = ?, telefone = ? WHERE id = ?");
+            $stmt->execute([$nome, $telefone, $id]);
+            
+            jsonResponse(['success' => true]);
+            break;
+
+        case 'DELETE':
+            // Excluir cliente
+            $id = intval($_GET['id'] ?? 0);
+            
+            if (!$id) {
+                jsonResponse(['error' => 'ID é obrigatório'], 400);
+            }
+
+            $stmt = $pdo->prepare("DELETE FROM clientes WHERE id = ?");
+            $stmt->execute([$id]);
+            
+            jsonResponse(['success' => true]);
             break;
 
         default:

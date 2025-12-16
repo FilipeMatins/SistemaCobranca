@@ -125,7 +125,7 @@ try {
 
                 $stmtCliente = $pdo->prepare("
                     INSERT INTO clientes (nome, telefone) VALUES (?, ?)
-                    ON DUPLICATE KEY UPDATE telefone = IF(VALUES(telefone) != '', VALUES(telefone), telefone)
+                    ON DUPLICATE KEY UPDATE telefone = VALUES(telefone)
                 ");
 
                 foreach ($clientes as $cliente) {
@@ -198,7 +198,7 @@ try {
 
                 $stmtCliente = $pdo->prepare("
                     INSERT INTO clientes (nome, telefone) VALUES (?, ?)
-                    ON DUPLICATE KEY UPDATE telefone = IF(VALUES(telefone) != '', VALUES(telefone), telefone)
+                    ON DUPLICATE KEY UPDATE telefone = VALUES(telefone)
                 ");
 
                 foreach ($clientes as $cliente) {

@@ -268,6 +268,16 @@ h1 {
     font-size: 1.1rem;
 }
 
+.badge-reenvio {
+    background: #f59e0b;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
 .cobranca-valor {
     color: #22c55e;
     font-weight: 700;
@@ -1233,6 +1243,211 @@ h1 {
     background: #dc2626;
 }
 
+/* ==================== CLIENTES ==================== */
+.clientes-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.clientes-acoes {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-novo-cliente {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-novo-cliente:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+}
+
+.btn-promocao {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-promocao:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+}
+
+.clientes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.cliente-card {
+    background: #1e293b;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.2s;
+}
+
+.cliente-card:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: translateY(-2px);
+}
+
+.cliente-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.cliente-card-nome {
+    font-weight: 600;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.cliente-card-acoes {
+    display: flex;
+    gap: 5px;
+}
+
+.cliente-card-acoes button {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.cliente-card-acoes button:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.cliente-card-telefone {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cliente-sem-telefone {
+    color: #ef4444;
+    font-style: italic;
+}
+
+/* Modal Promoção */
+.promocao-seletor {
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    color: #e2e8f0;
+    font-weight: 500;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+.promocao-lista {
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.promocao-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.2s;
+}
+
+.promocao-item:last-child {
+    border-bottom: none;
+}
+
+.promocao-item:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.promocao-item-info {
+    flex: 1;
+}
+
+.promocao-item-nome {
+    font-weight: 500;
+    color: #fff;
+}
+
+.promocao-item-telefone {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.btn-enviar-promocao {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.btn-enviar-promocao:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+}
+
+.clientes-vazio {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.clientes-vazio-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
     .alertas {
@@ -1281,6 +1496,24 @@ h1 {
         flex-direction: column;
         gap: 5px;
         align-items: flex-start;
+    }
+
+    .clientes-header-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .clientes-acoes {
+        flex-wrap: wrap;
+    }
+
+    .btn-novo-cliente,
+    .btn-promocao {
+        flex: 1;
+    }
+
+    .clientes-grid {
+        grid-template-columns: 1fr;
     }
 }
 

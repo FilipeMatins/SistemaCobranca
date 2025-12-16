@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarConfiguracoes();
     carregarNotinhas();
     carregarExcluidos();
+    carregarTodosClientes(); // Carrega para mostrar badge
     adicionarCliente();
     document.getElementById('data-cobranca').valueAsDate = new Date();
 
@@ -52,6 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
             document.getElementById('tab-' + tab.dataset.tab).style.display = 'block';
+            
+            // Carregar clientes ao abrir a aba
+            if (tab.dataset.tab === 'clientes') {
+                carregarTodosClientes();
+            }
         });
     });
 
@@ -70,11 +76,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Fechar modal com ESC
+    // Fechar modal com ESC e atalhos Enter
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             fecharConfiguracoes();
             fecharEdicao();
+            fecharModalCliente();
+            fecharModalPromocao();
+            fecharModalEnvioPromocao();
+        }
+        
+        // Enter para enviar promoção
+        if (e.key === 'Enter' && document.getElementById('modal-envio-promocao').classList.contains('show')) {
+            const btnEnviar = document.getElementById('btn-enviar-promocao');
+            const btnProximo = document.getElementById('btn-proximo-promocao');
+            
+            if (btnEnviar.style.display !== 'none') {
+                enviarPromocaoAtual();
+            } else if (btnProximo.style.display !== 'none') {
+                proximaPromocao();
+            }
         }
     });
 });
@@ -403,15 +424,35 @@ function cobrarTodos(notinhaId) {
     const notinha = todasNotinhas.find(n => n.id == notinhaId);
     if (!notinha) return;
     
-    const clientesNaoEnviados = notinha.clientes.filter(c => c.msg_enviada != 1);
+    const hoje = getHojeLocal();
+    const isAtrasada = notinha.data_cobranca < hoje;
     
-    if (clientesNaoEnviados.length === 0) {
-        showToast('Todos os clientes já foram cobrados!', 'error');
+    if (isAtrasada) {
+        // Notinha atrasada: pega TODOS para reenvio
+        filaCobranca = notinha.clientes.map(c => ({ 
+            ...c, 
+            empresa: notinha.empresa_nome, 
+            reenvio: c.msg_enviada == 1 
+        }));
+        modoReenvio = true;
+    } else {
+        // Notinha do dia: só os não enviados
+        const clientesNaoEnviados = notinha.clientes.filter(c => c.msg_enviada != 1);
+        
+        if (clientesNaoEnviados.length === 0) {
+            showToast('Todos os clientes já foram cobrados!', 'error');
+            return;
+        }
+        
+        filaCobranca = clientesNaoEnviados.map(c => ({ ...c, empresa: notinha.empresa_nome, reenvio: false }));
+        modoReenvio = false;
+    }
+
+    if (filaCobranca.length === 0) {
+        showToast('Nenhum cliente para cobrar!', 'error');
         return;
     }
 
-    // Usa o sistema de modal
-    filaCobranca = clientesNaoEnviados.map(c => ({ ...c, empresa: notinha.empresa_nome }));
     indiceAtual = 0;
     mostrarModalCobranca();
 }
@@ -477,6 +518,7 @@ function criarNotificacao(hoje, atrasados) {
 // Fila de cobranças
 let filaCobranca = [];
 let indiceAtual = 0;
+let modoReenvio = false;
 
 async function cobrarTodosHoje() {
     const hoje = getHojeLocal();
@@ -485,7 +527,7 @@ async function cobrarTodosHoje() {
     filaCobranca = [];
     notinhasHoje.forEach(n => {
         n.clientes.filter(c => c.msg_enviada != 1).forEach(c => {
-            filaCobranca.push({ ...c, empresa: n.empresa_nome });
+            filaCobranca.push({ ...c, empresa: n.empresa_nome, reenvio: false });
         });
     });
 
@@ -495,6 +537,7 @@ async function cobrarTodosHoje() {
     }
 
     indiceAtual = 0;
+    modoReenvio = false; // Modo normal, marca como enviado
     mostrarModalCobranca();
 }
 
@@ -503,18 +546,20 @@ async function cobrarTodasAtrasadas() {
     const notinhasAtrasadas = todasNotinhas.filter(n => n.data_cobranca < hoje);
     
     filaCobranca = [];
+    // Pega TODOS os clientes (para permitir reenvio)
     notinhasAtrasadas.forEach(n => {
-        n.clientes.filter(c => c.msg_enviada != 1).forEach(c => {
-            filaCobranca.push({ ...c, empresa: n.empresa_nome });
+        n.clientes.forEach(c => {
+            filaCobranca.push({ ...c, empresa: n.empresa_nome, reenvio: c.msg_enviada == 1 });
         });
     });
 
     if (filaCobranca.length === 0) {
-        showToast('Nenhuma cobrança atrasada pendente!', 'error');
+        showToast('Nenhuma cobrança atrasada!', 'error');
         return;
     }
 
     indiceAtual = 0;
+    modoReenvio = true; // Ativa modo reenvio (não marca como enviado de novo)
     mostrarModalCobranca();
 }
 
@@ -569,6 +614,22 @@ function atualizarModalCobranca() {
     document.getElementById('cobranca-telefone').textContent = cliente.telefone;
     document.getElementById('cobranca-empresa').textContent = cliente.empresa;
     
+    // Mostra badge de reenvio
+    const badgeReenvio = document.getElementById('badge-reenvio');
+    if (cliente.reenvio) {
+        badgeReenvio.style.display = 'inline-block';
+    } else {
+        badgeReenvio.style.display = 'none';
+    }
+    
+    // Título do modal
+    const tituloModal = document.getElementById('titulo-modal-cobranca');
+    if (modoReenvio) {
+        tituloModal.textContent = '🔄 Reenviar Cobranças';
+    } else {
+        tituloModal.textContent = '💬 Enviar Cobranças';
+    }
+    
     // Barra de progresso
     const porcentagem = ((indiceAtual + 1) / total) * 100;
     document.getElementById('cobranca-barra').style.width = porcentagem + '%';
@@ -604,8 +665,10 @@ function enviarCobrancaAtual() {
 function proximoCliente() {
     const cliente = filaCobranca[indiceAtual];
     
-    // Marca o atual como enviado
-    marcarComoEnviado([cliente.id]);
+    // Marca o atual como enviado (apenas se não for reenvio)
+    if (!modoReenvio && !cliente.reenvio) {
+        marcarComoEnviado([cliente.id]);
+    }
     
     // Vai para o próximo
     indiceAtual++;
@@ -616,7 +679,11 @@ function proximoCliente() {
         atualizarModalCobranca();
     } else {
         fecharModalCobranca();
-        showToast('🎉 Todas as cobranças enviadas!');
+        if (modoReenvio) {
+            showToast('🎉 Reenvio concluído!');
+        } else {
+            showToast('🎉 Todas as cobranças enviadas!');
+        }
     }
 }
 
@@ -922,4 +989,332 @@ async function salvarConfiguracoes() {
     } catch (error) {
         showToast('Erro', 'error');
     }
+}
+
+// ==================== GESTÃO DE CLIENTES ====================
+let todosClientes = [];
+let clientesFiltrados = [];
+
+async function carregarTodosClientes() {
+    try {
+        const response = await fetch('api/clientes.php');
+        todosClientes = await response.json();
+        clientesFiltrados = [...todosClientes];
+        renderizarClientes();
+        atualizarBadgeClientes();
+    } catch (error) {
+        console.error('Erro:', error);
+    }
+}
+
+function atualizarBadgeClientes() {
+    const badge = document.getElementById('badge-clientes');
+    if (todosClientes.length > 0) {
+        badge.textContent = todosClientes.length;
+        badge.style.display = 'inline-block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function renderizarClientes() {
+    const container = document.getElementById('clientes-grid');
+    
+    if (clientesFiltrados.length === 0) {
+        container.innerHTML = `
+            <div class="clientes-vazio">
+                <div class="clientes-vazio-icon">👥</div>
+                <p>Nenhum cliente cadastrado</p>
+                <p style="font-size: 0.8rem; margin-top: 5px;">Clique em "Novo Cliente" para adicionar</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = clientesFiltrados.map(c => `
+        <div class="cliente-card">
+            <div class="cliente-card-header">
+                <span class="cliente-card-nome">${c.nome}</span>
+                <div class="cliente-card-acoes">
+                    <button onclick="editarCliente(${c.id})" title="Editar">✏️</button>
+                    <button onclick="excluirCliente(${c.id})" title="Excluir">🗑️</button>
+                </div>
+            </div>
+            <div class="cliente-card-telefone">
+                📱 ${c.telefone ? formatarTelefone(c.telefone) : '<span class="cliente-sem-telefone">Sem telefone</span>'}
+            </div>
+        </div>
+    `).join('');
+}
+
+function formatarTelefone(tel) {
+    const numeros = tel.replace(/\D/g, '');
+    if (numeros.length === 11) {
+        return `(${numeros.slice(0,2)}) ${numeros.slice(2,7)}-${numeros.slice(7)}`;
+    }
+    return tel;
+}
+
+function filtrarClientes() {
+    const termo = document.getElementById('filtro-clientes').value.toLowerCase();
+    clientesFiltrados = todosClientes.filter(c => 
+        c.nome.toLowerCase().includes(termo) || 
+        (c.telefone && c.telefone.includes(termo))
+    );
+    renderizarClientes();
+}
+
+function abrirModalCliente(id = null) {
+    const modal = document.getElementById('modal-cliente');
+    const titulo = document.getElementById('titulo-modal-cliente');
+    
+    if (id) {
+        const cliente = todosClientes.find(c => c.id == id);
+        if (cliente) {
+            titulo.textContent = '✏️ Editar Cliente';
+            document.getElementById('cliente-id').value = cliente.id;
+            document.getElementById('cliente-nome').value = cliente.nome;
+            document.getElementById('cliente-telefone').value = cliente.telefone || '';
+        }
+    } else {
+        titulo.textContent = '➕ Novo Cliente';
+        document.getElementById('cliente-id').value = '';
+        document.getElementById('cliente-nome').value = '';
+        document.getElementById('cliente-telefone').value = '';
+    }
+    
+    modal.classList.add('show');
+}
+
+function fecharModalCliente() {
+    document.getElementById('modal-cliente').classList.remove('show');
+}
+
+function editarCliente(id) {
+    abrirModalCliente(id);
+}
+
+async function salvarCliente() {
+    const id = document.getElementById('cliente-id').value;
+    const nome = document.getElementById('cliente-nome').value.trim();
+    const telefone = document.getElementById('cliente-telefone').value.trim();
+    
+    if (!nome) {
+        showToast('Preencha o nome!', 'error');
+        return;
+    }
+    
+    try {
+        const method = id ? 'PUT' : 'POST';
+        const body = id 
+            ? { id, nome, telefone }
+            : { nome, telefone };
+            
+        const response = await fetch('api/clientes.php', {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast(id ? 'Cliente atualizado!' : 'Cliente cadastrado!');
+            fecharModalCliente();
+            carregarTodosClientes();
+        } else {
+            showToast(result.error || 'Erro ao salvar', 'error');
+        }
+    } catch (error) {
+        showToast('Erro de conexão', 'error');
+    }
+}
+
+async function excluirCliente(id) {
+    if (!confirm('Excluir este cliente?')) return;
+    
+    try {
+        const response = await fetch(`api/clientes.php?id=${id}`, {
+            method: 'DELETE'
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast('Cliente excluído!');
+            carregarTodosClientes();
+        } else {
+            showToast(result.error || 'Erro', 'error');
+        }
+    } catch (error) {
+        showToast('Erro de conexão', 'error');
+    }
+}
+
+// ==================== PROMOÇÕES ====================
+let clientesSelecionados = [];
+let filaPromocao = [];
+let indicePromocao = 0;
+let mensagemPromocao = '';
+
+function abrirModalPromocao() {
+    if (todosClientes.length === 0) {
+        showToast('Cadastre clientes primeiro!', 'error');
+        return;
+    }
+    
+    const modal = document.getElementById('modal-promocao');
+    const lista = document.getElementById('promocao-lista-clientes');
+    
+    // Só clientes com telefone
+    const clientesComTelefone = todosClientes.filter(c => c.telefone);
+    
+    if (clientesComTelefone.length === 0) {
+        showToast('Nenhum cliente com telefone cadastrado!', 'error');
+        return;
+    }
+    
+    clientesSelecionados = [];
+    document.getElementById('selecionar-todos-clientes').checked = false;
+    document.getElementById('promocao-mensagem').value = '';
+    
+    lista.innerHTML = clientesComTelefone.map(c => `
+        <div class="promocao-item">
+            <input type="checkbox" id="cliente-check-${c.id}" value="${c.id}" onchange="toggleClientePromocao(${c.id})">
+            <div class="promocao-item-info">
+                <div class="promocao-item-nome">${c.nome}</div>
+                <div class="promocao-item-telefone">${formatarTelefone(c.telefone)}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    atualizarContadorSelecionados();
+    modal.classList.add('show');
+}
+
+function fecharModalPromocao() {
+    document.getElementById('modal-promocao').classList.remove('show');
+}
+
+function toggleClientePromocao(id) {
+    const checkbox = document.getElementById(`cliente-check-${id}`);
+    if (checkbox.checked) {
+        clientesSelecionados.push(id);
+    } else {
+        clientesSelecionados = clientesSelecionados.filter(cid => cid !== id);
+    }
+    atualizarContadorSelecionados();
+}
+
+function toggleSelecionarTodosClientes() {
+    const selecionarTodos = document.getElementById('selecionar-todos-clientes').checked;
+    const clientesComTelefone = todosClientes.filter(c => c.telefone);
+    
+    clientesComTelefone.forEach(c => {
+        const checkbox = document.getElementById(`cliente-check-${c.id}`);
+        if (checkbox) {
+            checkbox.checked = selecionarTodos;
+        }
+    });
+    
+    if (selecionarTodos) {
+        clientesSelecionados = clientesComTelefone.map(c => c.id);
+    } else {
+        clientesSelecionados = [];
+    }
+    
+    atualizarContadorSelecionados();
+}
+
+function atualizarContadorSelecionados() {
+    document.getElementById('total-clientes-selecionados').textContent = clientesSelecionados.length;
+}
+
+function iniciarEnvioPromocao() {
+    mensagemPromocao = document.getElementById('promocao-mensagem').value.trim();
+    
+    if (!mensagemPromocao) {
+        showToast('Digite a mensagem da promoção!', 'error');
+        return;
+    }
+    
+    if (clientesSelecionados.length === 0) {
+        showToast('Selecione pelo menos um cliente!', 'error');
+        return;
+    }
+    
+    // Monta fila de envio
+    filaPromocao = clientesSelecionados.map(id => todosClientes.find(c => c.id == id)).filter(c => c && c.telefone);
+    indicePromocao = 0;
+    
+    fecharModalPromocao();
+    mostrarModalEnvioPromocao();
+}
+
+function mostrarModalEnvioPromocao() {
+    document.getElementById('modal-envio-promocao').classList.add('show');
+    document.getElementById('btn-enviar-promocao').style.display = 'block';
+    document.getElementById('btn-proximo-promocao').style.display = 'none';
+    atualizarModalEnvioPromocao();
+}
+
+function atualizarModalEnvioPromocao() {
+    const cliente = filaPromocao[indicePromocao];
+    const total = filaPromocao.length;
+    
+    document.getElementById('promocao-progresso').textContent = `${indicePromocao + 1} de ${total}`;
+    document.getElementById('promocao-nome').textContent = cliente.nome;
+    document.getElementById('promocao-telefone').textContent = formatarTelefone(cliente.telefone);
+    
+    // Barra de progresso
+    const porcentagem = ((indicePromocao + 1) / total) * 100;
+    document.getElementById('promocao-barra').style.width = porcentagem + '%';
+}
+
+function enviarPromocaoAtual() {
+    const cliente = filaPromocao[indicePromocao];
+    const primeiroNome = cliente.nome.split(' ')[0];
+    
+    // Substitui variáveis na mensagem
+    let msg = mensagemPromocao.replace(/{nome}/gi, primeiroNome);
+    
+    const telefone = cliente.telefone.replace(/\D/g, '');
+    const telefoneFormatado = telefone.startsWith('55') ? telefone : '55' + telefone;
+    
+    // Abre WhatsApp
+    const url = `whatsapp://send?phone=${telefoneFormatado}&text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+    
+    // Mostra botão próximo
+    document.getElementById('btn-enviar-promocao').style.display = 'none';
+    document.getElementById('btn-proximo-promocao').style.display = 'block';
+}
+
+function pularPromocaoAtual() {
+    indicePromocao++;
+    
+    if (indicePromocao < filaPromocao.length) {
+        document.getElementById('btn-enviar-promocao').style.display = 'block';
+        document.getElementById('btn-proximo-promocao').style.display = 'none';
+        atualizarModalEnvioPromocao();
+    } else {
+        fecharModalEnvioPromocao();
+        showToast('🎉 Promoção enviada para todos!');
+    }
+}
+
+function proximaPromocao() {
+    indicePromocao++;
+    
+    if (indicePromocao < filaPromocao.length) {
+        document.getElementById('btn-enviar-promocao').style.display = 'block';
+        document.getElementById('btn-proximo-promocao').style.display = 'none';
+        atualizarModalEnvioPromocao();
+    } else {
+        fecharModalEnvioPromocao();
+        showToast('🎉 Promoção enviada para todos!');
+    }
+}
+
+function fecharModalEnvioPromocao() {
+    document.getElementById('modal-envio-promocao').classList.remove('show');
 }
