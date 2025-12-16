@@ -994,12 +994,15 @@ async function salvarConfiguracoes() {
 // ==================== GESTÃO DE CLIENTES ====================
 let todosClientes = [];
 let clientesFiltrados = [];
+let paginaAtualClientes = 1;
+const clientesPorPagina = 20;
 
 async function carregarTodosClientes() {
     try {
         const response = await fetch('api/clientes.php');
         todosClientes = await response.json();
         clientesFiltrados = [...todosClientes];
+        paginaAtualClientes = 1;
         renderizarListaClientes();
         atualizarBadgeClientes();
     } catch (error) {
@@ -1018,34 +1021,110 @@ function atualizarBadgeClientes() {
 }
 
 function renderizarListaClientes() {
-    const container = document.getElementById('clientes-grid');
-    if (!container) return; // Evita erro se não estiver na aba
+    const container = document.getElementById('clientes-lista');
+    if (!container) return;
     
     if (clientesFiltrados.length === 0) {
         container.innerHTML = `
             <div class="clientes-vazio">
                 <div class="clientes-vazio-icon">👥</div>
-                <p>Nenhum cliente cadastrado</p>
+                <p>Nenhum cliente encontrado</p>
                 <p style="font-size: 0.8rem; margin-top: 5px;">Clique em "Novo Cliente" para adicionar</p>
             </div>
         `;
+        renderizarPaginacao();
         return;
     }
 
-    container.innerHTML = clientesFiltrados.map(c => `
-        <div class="cliente-card">
-            <div class="cliente-card-header">
-                <span class="cliente-card-nome">${c.nome}</span>
-                <div class="cliente-card-acoes">
-                    <button onclick="editarCliente(${c.id})" title="Editar">✏️</button>
-                    <button onclick="excluirCliente(${c.id})" title="Excluir">🗑️</button>
-                </div>
-            </div>
-            <div class="cliente-card-telefone">
-                📱 ${c.telefone ? formatarTelefone(c.telefone) : '<span class="cliente-sem-telefone">Sem telefone</span>'}
+    // Paginação
+    const inicio = (paginaAtualClientes - 1) * clientesPorPagina;
+    const fim = inicio + clientesPorPagina;
+    const clientesPagina = clientesFiltrados.slice(inicio, fim);
+
+    container.innerHTML = clientesPagina.map(c => `
+        <div class="cliente-item">
+            <span class="cliente-item-nome">${c.nome}</span>
+            <span class="cliente-item-telefone">
+                ${c.telefone ? formatarTelefone(c.telefone) : '<span class="cliente-sem-telefone">Sem telefone</span>'}
+            </span>
+            <div class="cliente-item-acoes">
+                <button class="btn-editar" onclick="editarCliente(${c.id})" title="Editar">✏️</button>
+                <button class="btn-excluir" onclick="excluirCliente(${c.id})" title="Excluir">🗑️</button>
             </div>
         </div>
     `).join('');
+
+    renderizarPaginacao();
+}
+
+function renderizarPaginacao() {
+    const container = document.getElementById('paginacao-clientes');
+    if (!container) return;
+
+    const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
+    
+    if (totalPaginas <= 1) {
+        container.innerHTML = clientesFiltrados.length > 0 
+            ? `<span class="paginacao-info">${clientesFiltrados.length} cliente(s)</span>`
+            : '';
+        return;
+    }
+
+    const inicio = (paginaAtualClientes - 1) * clientesPorPagina + 1;
+    const fim = Math.min(paginaAtualClientes * clientesPorPagina, clientesFiltrados.length);
+
+    let html = `
+        <span class="paginacao-info">
+            Mostrando ${inicio}-${fim} de ${clientesFiltrados.length}
+        </span>
+        <div class="paginacao-botoes">
+            <button class="paginacao-btn" onclick="mudarPaginaClientes(1)" ${paginaAtualClientes === 1 ? 'disabled' : ''}>
+                ««
+            </button>
+            <button class="paginacao-btn" onclick="mudarPaginaClientes(${paginaAtualClientes - 1})" ${paginaAtualClientes === 1 ? 'disabled' : ''}>
+                ‹
+            </button>
+    `;
+
+    // Mostra até 5 páginas
+    let paginaInicio = Math.max(1, paginaAtualClientes - 2);
+    let paginaFim = Math.min(totalPaginas, paginaInicio + 4);
+    
+    if (paginaFim - paginaInicio < 4) {
+        paginaInicio = Math.max(1, paginaFim - 4);
+    }
+
+    for (let i = paginaInicio; i <= paginaFim; i++) {
+        html += `
+            <button class="paginacao-btn ${i === paginaAtualClientes ? 'active' : ''}" 
+                    onclick="mudarPaginaClientes(${i})">
+                ${i}
+            </button>
+        `;
+    }
+
+    html += `
+            <button class="paginacao-btn" onclick="mudarPaginaClientes(${paginaAtualClientes + 1})" ${paginaAtualClientes === totalPaginas ? 'disabled' : ''}>
+                ›
+            </button>
+            <button class="paginacao-btn" onclick="mudarPaginaClientes(${totalPaginas})" ${paginaAtualClientes === totalPaginas ? 'disabled' : ''}>
+                »»
+            </button>
+        </div>
+    `;
+
+    container.innerHTML = html;
+}
+
+function mudarPaginaClientes(pagina) {
+    const totalPaginas = Math.ceil(clientesFiltrados.length / clientesPorPagina);
+    if (pagina < 1 || pagina > totalPaginas) return;
+    
+    paginaAtualClientes = pagina;
+    renderizarListaClientes();
+    
+    // Scroll para o topo da lista
+    document.getElementById('clientes-lista-container')?.scrollIntoView({ behavior: 'smooth' });
 }
 
 function formatarTelefone(tel) {
@@ -1062,6 +1141,7 @@ function filtrarClientes() {
         c.nome.toLowerCase().includes(termo) || 
         (c.telefone && c.telefone.includes(termo))
     );
+    paginaAtualClientes = 1; // Volta para primeira página ao filtrar
     renderizarListaClientes();
 }
 

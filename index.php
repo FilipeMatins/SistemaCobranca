@@ -157,8 +157,19 @@
                 <input type="text" class="filtro-busca" id="filtro-clientes" placeholder="🔍 Buscar cliente..." oninput="filtrarClientes()">
             </div>
 
-            <div class="clientes-grid" id="clientes-grid">
-                <!-- Lista de clientes será carregada aqui -->
+            <div class="clientes-lista" id="clientes-lista-container">
+                <div class="clientes-lista-header">
+                    <span>Nome</span>
+                    <span>Telefone</span>
+                    <span>Ações</span>
+                </div>
+                <div id="clientes-lista">
+                    <!-- Lista de clientes será carregada aqui -->
+                </div>
+            </div>
+            
+            <div class="paginacao" id="paginacao-clientes">
+                <!-- Paginação será carregada aqui -->
             </div>
         </div>
 
