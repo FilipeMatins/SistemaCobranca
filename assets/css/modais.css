@@ -1,0 +1,206 @@
+/* ==================== MODAL BASE ==================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 30px;
+    width: 90%;
+    max-width: 450px;
+    border: 1px solid rgba(255,255,255,0.1);
+    animation: modalIn 0.2s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.modal h2 {
+    color: #fff;
+    margin-bottom: 25px;
+    font-size: 1.2rem;
+}
+
+.modal .form-group {
+    margin-bottom: 18px;
+}
+
+/* ==================== MODAL BUTTONS ==================== */
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.btn-cancelar {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #334155;
+    background: transparent;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-cancelar:hover {
+    background: #334155;
+}
+
+.btn-salvar-config {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: #3b82f6;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-salvar-config:hover {
+    background: #2563eb;
+}
+
+/* ==================== CLIENTES EXCLUÍDOS NO MODAL DE EDIÇÃO ==================== */
+.clientes-excluidos-container {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.clientes-excluidos-titulo {
+    color: #f87171;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.cliente-excluido-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+.cliente-excluido-row:last-child {
+    margin-bottom: 0;
+}
+
+.cliente-excluido-nome {
+    color: #cbd5e1;
+    flex: 1;
+}
+
+.cliente-excluido-valor {
+    color: #94a3b8;
+    margin-right: 15px;
+}
+
+.btn-restaurar-cliente {
+    background: #22c55e;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: background 0.2s;
+}
+
+.btn-restaurar-cliente:hover {
+    background: #16a34a;
+}
+
+/* ==================== AÇÕES DO CLIENTE NA EDIÇÃO ==================== */
+.cliente-row-edicao {
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.cliente-row-edicao .cliente-row {
+    margin-bottom: 0;
+}
+
+.cliente-acoes-edicao {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-top: 10px;
+    margin-top: 10px;
+    border-top: 1px dashed rgba(255,255,255,0.1);
+}
+
+.btn-cobrar-edicao {
+    background: #22c55e;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-cobrar-edicao:hover {
+    background: #16a34a;
+}
+
+.btn-recebido-edicao {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-recebido-edicao:hover {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+.badge-enviado-edicao {
+    background: rgba(168, 85, 247, 0.2);
+    color: #c084fc;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: auto;
+}
+

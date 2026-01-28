@@ -23,7 +23,12 @@ $method = $_SERVER['REQUEST_METHOD'];
 try {
     switch ($method) {
         case 'GET':
-            $controller->index();
+            $action = $_GET['action'] ?? '';
+            if ($action === 'clientes_excluidos') {
+                $controller->clientesExcluidos();
+            } else {
+                $controller->index();
+            }
             break;
             
         case 'POST':
@@ -40,6 +45,16 @@ try {
             
             if ($action === 'marcar_enviado') {
                 $controller->marcarEnviado();
+            } elseif ($action === 'inadimplente') {
+                $controller->marcarInadimplente();
+            } elseif ($action === 'excluir_cliente') {
+                $controller->excluirCliente();
+            } elseif ($action === 'restaurar_cliente') {
+                $controller->restaurarCliente();
+            } elseif ($action === 'excluir_cliente_permanente') {
+                $controller->excluirClientePermanente();
+            } elseif ($action === 'receber_cliente') {
+                $controller->receberCliente();
             } else {
                 $controller->restaurar();
             }

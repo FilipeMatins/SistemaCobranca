@@ -1,0 +1,109 @@
+/* ==================== LIXEIRA / EXCLUÍDOS ==================== */
+.info-lixeira {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.info-lixeira span {
+    font-size: 2rem;
+}
+
+.info-lixeira p {
+    color: #f87171;
+    font-size: 0.9rem;
+}
+
+.secao-titulo {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+/* ==================== NOTINHAS EXCLUÍDAS ==================== */
+.excluidos-header {
+    grid-template-columns: 180px 1fr 100px 120px 140px;
+}
+
+.excluido-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 100px 120px 140px;
+    gap: 12px;
+    padding: 15px 20px;
+    border-bottom: 1px solid #334155;
+    align-items: center;
+}
+
+.excluido-row:last-child {
+    border-bottom: none;
+}
+
+/* ==================== CLIENTES EXCLUÍDOS ==================== */
+.clientes-excluidos-header {
+    grid-template-columns: 1fr 150px 100px 120px 160px;
+}
+
+.cliente-excluido-lista-row {
+    display: grid;
+    grid-template-columns: 1fr 150px 100px 120px 160px;
+    gap: 12px;
+    padding: 15px 20px;
+    border-bottom: 1px solid #334155;
+    align-items: center;
+}
+
+.cliente-excluido-lista-row:last-child {
+    border-bottom: none;
+}
+
+/* ==================== DIAS RESTANTES ==================== */
+.dias-restantes {
+    color: #f87171;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.dias-restantes.poucos {
+    color: #ef4444;
+    animation: pulse 1s infinite;
+}
+
+/* ==================== BOTÕES EXCLUÍDOS ==================== */
+.btn-restaurar {
+    background: #22c55e;
+    color: #fff;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-restaurar:hover {
+    background: #16a34a;
+}
+
+.btn-excluir-perm {
+    background: #ef4444;
+    color: #fff;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-excluir-perm:hover {
+    background: #dc2626;
+}
+

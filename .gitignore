@@ -1,5 +1,7 @@
-# Config local (se tiver senhas)
+# Config local (senhas e dados sensíveis)
 config/local.php
+config.php
+backup_banco.sql
 
 # IDE
 .idea/

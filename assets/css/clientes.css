@@ -1,0 +1,191 @@
+/* ==================== CLIENTES ==================== */
+.clientes-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.clientes-acoes {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-novo-cliente {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-novo-cliente:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+}
+
+.btn-promocao {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-promocao:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+}
+
+#filtro-clientes {
+    flex: 1;
+    max-width: 300px;
+}
+
+/* ==================== LISTA DE CLIENTES ==================== */
+.clientes-lista {
+    background: #1e293b;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+}
+
+.clientes-lista-header {
+    display: grid;
+    grid-template-columns: 1fr 150px 120px;
+    padding: 12px 15px;
+    background: rgba(255,255,255,0.05);
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.cliente-item {
+    display: grid;
+    grid-template-columns: 1fr 150px 120px;
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.cliente-item:last-child {
+    border-bottom: none;
+}
+
+.cliente-item:hover {
+    background: rgba(255,255,255,0.03);
+}
+
+.cliente-item-nome {
+    font-weight: 500;
+    color: #fff;
+}
+
+.cliente-item-telefone {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.cliente-sem-telefone {
+    color: #ef4444;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+.cliente-item-acoes {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.cliente-item-acoes button {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.cliente-item-acoes button:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.cliente-item-acoes button.btn-editar:hover {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+.cliente-item-acoes button.btn-excluir:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+/* ==================== PAGINAÇÃO ==================== */
+.paginacao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 15px;
+}
+
+.paginacao-info {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.paginacao-botoes {
+    display: flex;
+    gap: 5px;
+}
+
+.paginacao-btn {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.paginacao-btn:hover:not(:disabled) {
+    background: rgba(255,255,255,0.2);
+}
+
+.paginacao-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.paginacao-btn.active {
+    background: #3b82f6;
+}
+
+/* ==================== ESTADO VAZIO ==================== */
+.clientes-vazio {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.clientes-vazio-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+

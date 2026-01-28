@@ -38,8 +38,13 @@ CREATE TABLE notinhas (
     data_cobranca DATE NOT NULL,
     enviada TINYINT(1) DEFAULT 0,
     deleted_at DATETIME NULL,
+    inadimplente_at DATETIME NULL,
+    numero_parcela INT DEFAULT 1,
+    total_parcelas INT DEFAULT 1,
+    parcela_origem_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (empresa_id) REFERENCES empresas(id) ON DELETE CASCADE
+    FOREIGN KEY (empresa_id) REFERENCES empresas(id) ON DELETE CASCADE,
+    FOREIGN KEY (parcela_origem_id) REFERENCES notinhas(id) ON DELETE SET NULL
 );
 
 -- Tabela de Clientes da Notinha
@@ -51,9 +56,13 @@ CREATE TABLE notinha_clientes (
     telefone VARCHAR(20) NOT NULL,
     msg_enviada TINYINT(1) DEFAULT 0,
     data_envio DATETIME NULL,
+    deleted_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (notinha_id) REFERENCES notinhas(id) ON DELETE CASCADE
 );
 
--- Índice para buscar excluídos
+-- Índices
 CREATE INDEX idx_notinhas_deleted ON notinhas(deleted_at);
+CREATE INDEX idx_notinhas_inadimplente ON notinhas(inadimplente_at);
+CREATE INDEX idx_notinhas_data ON notinhas(data_cobranca);
+CREATE INDEX idx_clientes_deleted ON notinha_clientes(deleted_at);

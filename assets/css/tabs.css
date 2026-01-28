@@ -1,0 +1,46 @@
+/* ==================== TABS ==================== */
+.tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 20px;
+    background: rgba(255,255,255,0.05);
+    padding: 5px;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.tab {
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: #fff;
+}
+
+.tab.active {
+    background: #3b82f6;
+    color: #fff;
+}
+
+.tab .badge {
+    background: #ef4444;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    margin-left: 5px;
+}
+
+.tab .badge:empty {
+    display: none;
+}
+

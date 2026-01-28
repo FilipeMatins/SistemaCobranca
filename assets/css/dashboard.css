@@ -1,0 +1,261 @@
+/* ==================== DASHBOARD ==================== */
+
+/* Métricas Principais */
+.dashboard-metricas {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.metrica-card {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metrica-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.metrica-card.metrica-warning {
+    background: linear-gradient(135deg, #7c2d12 0%, #9a3412 100%);
+}
+
+.metrica-icon {
+    font-size: 2.5rem;
+}
+
+.metrica-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.metrica-label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-bottom: 5px;
+}
+
+.metrica-valor {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* Gráficos */
+.dashboard-graficos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.grafico-card {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.grafico-card h3 {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.grafico-card canvas {
+    max-height: 250px;
+}
+
+/* Rankings */
+.dashboard-ranking {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.ranking-card {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.ranking-card h3 {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* Ranking de Clientes */
+.ranking-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.ranking-item:last-child {
+    border-bottom: none;
+}
+
+.ranking-posicao {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-right: 12px;
+}
+
+.ranking-posicao.top1 {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #000;
+}
+
+.ranking-posicao.top2 {
+    background: linear-gradient(135deg, #9ca3af, #6b7280);
+    color: #000;
+}
+
+.ranking-posicao.top3 {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    color: #fff;
+}
+
+.ranking-posicao.outros {
+    background: rgba(255,255,255,0.1);
+    color: #94a3b8;
+}
+
+.ranking-info {
+    flex: 1;
+}
+
+.ranking-nome {
+    font-weight: 500;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.ranking-detalhe {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.ranking-valor {
+    font-weight: 600;
+    color: #22c55e;
+    font-size: 0.95rem;
+}
+
+/* Próximos Vencimentos */
+.vencimento-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.03);
+    transition: background 0.2s;
+}
+
+.vencimento-item:hover {
+    background: rgba(255,255,255,0.06);
+}
+
+.vencimento-item.vence-hoje {
+    background: rgba(59, 130, 246, 0.15);
+    border-left: 3px solid #3b82f6;
+}
+
+.vencimento-item.vence-amanha {
+    background: rgba(245, 158, 11, 0.15);
+    border-left: 3px solid #f59e0b;
+}
+
+.vencimento-info {
+    flex: 1;
+}
+
+.vencimento-cliente {
+    font-weight: 500;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.vencimento-empresa {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.vencimento-data {
+    text-align: right;
+}
+
+.vencimento-dia {
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.vencimento-valor {
+    font-size: 0.85rem;
+    color: #22c55e;
+}
+
+/* Empty State Dashboard */
+.dashboard-empty {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.dashboard-empty-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .dashboard-metricas {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dashboard-graficos,
+    .dashboard-ranking {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard-metricas {
+        grid-template-columns: 1fr;
+    }
+    
+    .metrica-card {
+        padding: 15px;
+    }
+    
+    .metrica-icon {
+        font-size: 2rem;
+    }
+    
+    .metrica-valor {
+        font-size: 1.2rem;
+    }
+}
+

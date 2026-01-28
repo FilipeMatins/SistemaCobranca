@@ -1,0 +1,235 @@
+/* ==================== FORM CARD ==================== */
+.form-card {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.form-card h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    flex: 1;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-bottom: 6px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #64748b;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ==================== AUTOCOMPLETE ==================== */
+.autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    z-index: 100;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    margin-top: 4px;
+}
+
+.autocomplete-list.show {
+    display: block;
+}
+
+.autocomplete-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.autocomplete-item:hover {
+    background: #334155;
+}
+
+.autocomplete-item .telefone {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+/* ==================== TABELA DE CLIENTES (FORM) ==================== */
+.clientes-table {
+    width: 100%;
+    margin: 15px 0;
+}
+
+.clientes-table-header {
+    display: grid;
+    grid-template-columns: 2fr 100px 150px 40px;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.7rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    border-bottom: 1px solid #334155;
+}
+
+.cliente-row {
+    display: grid;
+    grid-template-columns: 2fr 100px 150px 40px;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #1e293b;
+    animation: fadeIn 0.2s ease;
+}
+
+.cliente-row input {
+    padding: 8px 10px;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    background: #0f172a;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.cliente-row input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.cliente-row input.valor {
+    text-align: right;
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.cliente-row .nome-wrapper {
+    position: relative;
+}
+
+/* ==================== BOTÕES ==================== */
+.btn-remove {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: #ef4444;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remove:hover {
+    background: #dc2626;
+}
+
+.btn-add {
+    background: transparent;
+    border: 1px dashed #3b82f6;
+    color: #3b82f6;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.btn-add:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.btn-salvar {
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+
+.btn-salvar:hover {
+    background: #2563eb;
+}
+
+/* ==================== INFO BOX ==================== */
+.info-box {
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 15px;
+    line-height: 1.5;
+}
+
+.info-box code {
+    background: #334155;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+

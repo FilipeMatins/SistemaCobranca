@@ -28,6 +28,8 @@ class NotinhaController extends Controller
         
         if ($action === 'excluidos') {
             $notinhas = $this->model->listarExcluidas();
+        } elseif ($action === 'inadimplentes') {
+            $notinhas = $this->model->listarInadimplentes();
         } else {
             $notinhas = $this->model->listarAtivas();
         }
@@ -40,15 +42,10 @@ class NotinhaController extends Controller
         $data = $this->getJsonInput();
         
         $empresaNome = trim($data['empresa'] ?? '');
-        $dataCobranca = $data['data_cobranca'] ?? '';
         $clientes = $data['clientes'] ?? [];
         
         if (empty($empresaNome)) {
             Response::error('Nome da empresa é obrigatório');
-        }
-        
-        if (empty($dataCobranca)) {
-            Response::error('Data da cobrança é obrigatória');
         }
         
         if (empty($clientes)) {
@@ -61,31 +58,73 @@ class NotinhaController extends Controller
             // Busca ou cria empresa
             $empresa = $this->empresaModel->buscarOuCriar($empresaNome);
             
-            // Cria notinha
-            $notinhaId = $this->model->criar($empresa['id'], $dataCobranca);
+            $notinhasIds = [];
+            $temParcelas = false;
             
-            // Adiciona clientes
+            // Processa cada cliente individualmente
             foreach ($clientes as $cliente) {
                 $nome = trim($cliente['nome'] ?? '');
                 $valor = $this->parseValor($cliente['valor'] ?? '0');
                 $telefone = trim($cliente['telefone'] ?? '');
+                $numParcelas = intval($cliente['parcelas'] ?? 1);
+                $datasParcelas = $cliente['datasParcelas'] ?? [date('Y-m-d')];
                 
-                if (!empty($nome)) {
+                if (empty($nome)) continue;
+                
+                // Salva cliente no cadastro
+                $this->clienteModel->salvarOuAtualizar($nome, $telefone);
+                
+                if ($numParcelas > 1) {
+                    $temParcelas = true;
+                    // Cria uma notinha para cada parcela
+                    $valorParcela = $valor / $numParcelas;
+                    $parcelaOrigemId = null;
+                    
+                    for ($i = 0; $i < $numParcelas; $i++) {
+                        // Usa a data específica de cada parcela
+                        $dataParcela = $datasParcelas[$i] ?? date('Y-m-d');
+                        
+                        // Cria notinha (número da parcela é i+1)
+                        $notinhaId = $this->model->criar($empresa['id'], $dataParcela, $i + 1, $numParcelas, $parcelaOrigemId);
+                        
+                        if ($i === 0) {
+                            $parcelaOrigemId = $notinhaId;
+                        }
+                        
+                        // Adiciona cliente
+                        $this->model->adicionarCliente($notinhaId, $nome, $valorParcela, $telefone);
+                        $notinhasIds[] = $notinhaId;
+                    }
+                } else {
+                    // Cliente à vista - cria notinha única
+                    $dataCobranca = $datasParcelas[0] ?? date('Y-m-d');
+                    $notinhaId = $this->model->criar($empresa['id'], $dataCobranca);
                     $this->model->adicionarCliente($notinhaId, $nome, $valor, $telefone);
-                    $this->clienteModel->salvarOuAtualizar($nome, $telefone);
+                    $notinhasIds[] = $notinhaId;
                 }
             }
             
             $this->model->confirmarTransacao();
             
+            $msg = $temParcelas ? 'Notinha salva com parcelas!' : 'Notinha salva com sucesso!';
             Response::created([
-                'id' => $notinhaId
-            ], 'Notinha salva com sucesso!');
+                'ids' => $notinhasIds
+            ], $msg);
             
         } catch (\Exception $e) {
             $this->model->cancelarTransacao();
             Response::error($e->getMessage(), 500);
         }
+    }
+    
+    private function buscarNotinhaPorEmpresaData(int $empresaId, string $data, array $idsExistentes): ?int
+    {
+        // Busca uma notinha já criada nesta mesma requisição com mesma empresa e data
+        foreach ($idsExistentes as $id) {
+            // Como estamos na mesma transação, verificamos as notinhas que criamos
+            // Para simplificar, retorna null e sempre cria uma nova
+        }
+        return null;
     }
     
     public function update(): void
@@ -164,6 +203,118 @@ class NotinhaController extends Controller
             Response::success(null, 'Notinha restaurada!');
         } else {
             Response::notFound('Notinha não encontrada');
+        }
+    }
+    
+    public function marcarInadimplente(): void
+    {
+        $data = $this->getJsonInput();
+        $id = $data['id'] ?? 0;
+        
+        if (!$id) {
+            Response::error('ID não informado');
+        }
+        
+        if ($this->model->moverParaInadimplentes($id)) {
+            Response::success(null, 'Notinha marcada como inadimplente!');
+        } else {
+            Response::notFound('Notinha não encontrada');
+        }
+    }
+    
+    public function excluirCliente(): void
+    {
+        $data = $this->getJsonInput();
+        $clienteId = $data['cliente_id'] ?? 0;
+        
+        if (!$clienteId) {
+            Response::error('ID do cliente não informado');
+        }
+        
+        if ($this->model->excluirCliente($clienteId)) {
+            Response::success(null, 'Cliente removido da notinha!');
+        } else {
+            Response::notFound('Cliente não encontrado');
+        }
+    }
+    
+    public function restaurarCliente(): void
+    {
+        $data = $this->getJsonInput();
+        $clienteId = $data['cliente_id'] ?? 0;
+        
+        if (!$clienteId) {
+            Response::error('ID do cliente não informado');
+        }
+        
+        if ($this->model->restaurarCliente($clienteId)) {
+            Response::success(null, 'Cliente restaurado!');
+        } else {
+            Response::notFound('Cliente não encontrado');
+        }
+    }
+    
+    public function clientesExcluidos(): void
+    {
+        $notinhaId = intval($this->getQueryParam('notinha_id', 0));
+        
+        if ($notinhaId) {
+            // Busca clientes excluídos de uma notinha específica
+            $clientes = $this->model->buscarClientesExcluidos($notinhaId);
+        } else {
+            // Busca todos os clientes excluídos
+            $clientes = $this->model->listarTodosClientesExcluidos();
+        }
+        
+        Response::json($clientes);
+    }
+    
+    public function excluirClientePermanente(): void
+    {
+        $data = $this->getJsonInput();
+        $clienteId = $data['cliente_id'] ?? 0;
+        
+        if (!$clienteId) {
+            Response::error('ID do cliente não informado');
+        }
+        
+        if ($this->model->excluirClientePermanente($clienteId)) {
+            Response::success(null, 'Cliente excluído permanentemente!');
+        } else {
+            Response::notFound('Cliente não encontrado');
+        }
+    }
+    
+    public function receberCliente(): void
+    {
+        $data = $this->getJsonInput();
+        $clienteId = $data['cliente_id'] ?? 0;
+        
+        if (!$clienteId) {
+            Response::error('ID do cliente não informado');
+        }
+        
+        // Busca a notinha do cliente
+        $notinhaId = $this->model->buscarNotinhaIdDoCliente($clienteId);
+        
+        if (!$notinhaId) {
+            Response::notFound('Cliente não encontrado');
+            return;
+        }
+        
+        // Marca o cliente como recebido (soft delete com flag especial)
+        if ($this->model->marcarClienteRecebido($clienteId)) {
+            // Verifica se ainda existem clientes ativos na notinha
+            $clientesAtivos = $this->model->contarClientesAtivos($notinhaId);
+            
+            if ($clientesAtivos === 0) {
+                // Todos os clientes foram recebidos, marca a notinha toda como recebida
+                $this->model->marcarComoRecebido($notinhaId);
+            }
+            
+            Response::success(['notinha_recebida' => $clientesAtivos === 0], 'Cliente marcado como recebido!');
+        } else {
+            Response::error('Erro ao marcar como recebido');
         }
     }
     

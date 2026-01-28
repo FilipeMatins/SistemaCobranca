@@ -1,0 +1,766 @@
+/* ==================== ACESSIBILIDADE ==================== */
+
+/* Botão de busca no header */
+.btn-header-icon {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-header-icon:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Dropdown de Acessibilidade */
+.acessibilidade-selector {
+    position: relative;
+}
+
+.btn-acessibilidade-toggle {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-acessibilidade-toggle:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.acessibilidade-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: #1e293b;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 8px;
+    min-width: 180px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.acessibilidade-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+}
+
+.dropdown-label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.dropdown-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.dropdown-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.dropdown-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 6px 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: #e2e8f0;
+    cursor: pointer;
+    font-size: 0.85rem;
+    text-align: left;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* ==================== TAMANHOS DE FONTE ==================== */
+html.fonte-pequena {
+    font-size: 14px;
+}
+
+html.fonte-normal {
+    font-size: 16px;
+}
+
+html.fonte-grande {
+    font-size: 18px;
+}
+
+html.fonte-muito-grande {
+    font-size: 20px;
+}
+
+/* ==================== MODO CLARO ==================== */
+html.modo-claro body {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+html.modo-claro .container {
+    background: #f1f5f9;
+}
+
+html.modo-claro .header h1 {
+    color: #1e293b;
+}
+
+html.modo-claro .form-card,
+html.modo-claro .notinhas-table,
+html.modo-claro .filtros,
+html.modo-claro .dashboard-metricas .metrica-card,
+html.modo-claro .grafico-card,
+html.modo-claro .ranking-card {
+    background: #fff;
+    border-color: #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+html.modo-claro .modal {
+    background: #fff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .modal h2,
+html.modo-claro .modal h3 {
+    color: #1e293b !important;
+}
+
+html.modo-claro .modal p {
+    color: #475569 !important;
+}
+
+html.modo-claro .modal-overlay {
+    background: rgba(0,0,0,0.5) !important;
+}
+
+/* Botões de cancelar e fechar nos modais */
+html.modo-claro .btn-cancelar {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    border: 1px solid #94a3b8 !important;
+}
+
+html.modo-claro .btn-cancelar:hover {
+    background: #e2e8f0 !important;
+}
+
+html.modo-claro .btn-fechar,
+html.modo-claro .modal-close {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    border: 1px solid #94a3b8 !important;
+}
+
+html.modo-claro .btn-fechar:hover,
+html.modo-claro .modal-close:hover {
+    background: #e2e8f0 !important;
+}
+
+/* Modal de atalhos */
+html.modo-claro .atalho-item {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .atalho-tecla {
+    color: #1e293b !important;
+}
+
+html.modo-claro .atalho-tecla .tecla,
+html.modo-claro .tecla {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+html.modo-claro .atalho-descricao {
+    color: #475569 !important;
+}
+
+/* Lista de atalhos */
+html.modo-claro .atalhos-lista {
+    color: #1e293b !important;
+}
+
+html.modo-claro .notinhas-header,
+html.modo-claro .clientes-table-header,
+html.modo-claro .clientes-lista-header {
+    background: #f8fafc;
+    color: #64748b;
+}
+
+html.modo-claro .notinha-row,
+html.modo-claro .cliente-row {
+    border-color: #e2e8f0;
+}
+
+html.modo-claro .notinha-main:hover {
+    background: #f8fafc;
+}
+
+html.modo-claro input,
+html.modo-claro select,
+html.modo-claro textarea {
+    background: #fff !important;
+    border: 1px solid #94a3b8 !important;
+    color: #1e293b !important;
+}
+
+html.modo-claro input::placeholder {
+    color: #94a3b8 !important;
+}
+
+html.modo-claro label {
+    color: #475569 !important;
+}
+
+html.modo-claro .tab {
+    color: #64748b;
+}
+
+html.modo-claro .tab.active {
+    background: #3b82f6;
+    color: #fff;
+}
+
+html.modo-claro .alerta {
+    background: #fff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .alerta-hoje {
+    border-left: 4px solid #3b82f6 !important;
+}
+
+html.modo-claro .alerta-atrasado {
+    border-left: 4px solid #ef4444 !important;
+}
+
+html.modo-claro .alerta-total {
+    border-left: 4px solid #22c55e !important;
+}
+
+html.modo-claro .notinha-empresa,
+html.modo-claro .metrica-valor,
+html.modo-claro h2, html.modo-claro h3 {
+    color: #1e293b;
+}
+
+html.modo-claro .notinha-clientes-preview,
+html.modo-claro .notinha-data,
+html.modo-claro .metrica-label {
+    color: #64748b;
+}
+
+/* Header e botões no modo claro */
+html.modo-claro .header {
+    background: #fff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .btn-config {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+    border: 1px solid #94a3b8 !important;
+}
+
+html.modo-claro .btn-config:hover {
+    background: #cbd5e1 !important;
+}
+
+/* Botão de busca no header modo claro */
+html.modo-claro .btn-header-icon {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+    border: 1px solid #94a3b8 !important;
+}
+
+html.modo-claro .btn-header-icon:hover {
+    background: #cbd5e1 !important;
+}
+
+/* Dropdown de acessibilidade modo claro */
+html.modo-claro .btn-acessibilidade-toggle {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+    border: 1px solid #94a3b8 !important;
+}
+
+html.modo-claro .btn-acessibilidade-toggle:hover {
+    background: #cbd5e1 !important;
+}
+
+html.modo-claro .acessibilidade-dropdown {
+    background: #fff !important;
+    border: 1px solid #94a3b8 !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+}
+
+html.modo-claro .dropdown-label {
+    color: #64748b !important;
+}
+
+html.modo-claro .dropdown-btn {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+html.modo-claro .dropdown-btn:hover {
+    background: #e2e8f0 !important;
+}
+
+html.modo-claro .dropdown-divider {
+    background: #e2e8f0 !important;
+}
+
+html.modo-claro .dropdown-item {
+    color: #1e293b !important;
+}
+
+html.modo-claro .dropdown-item:hover {
+    background: #f1f5f9 !important;
+}
+
+/* Idioma selector no modo claro */
+html.modo-claro .btn-idioma,
+html.modo-claro .idioma-selector .btn-idioma,
+html.modo-claro .idioma-selector > .btn-idioma {
+    background: #e2e8f0 !important;
+    color: #1e293b !important;
+    border: 1px solid #94a3b8 !important;
+}
+
+html.modo-claro .btn-idioma:hover,
+html.modo-claro .idioma-selector .btn-idioma:hover {
+    background: #cbd5e1 !important;
+}
+
+html.modo-claro .idioma-dropdown {
+    background: #fff !important;
+    border: 1px solid #94a3b8 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+
+html.modo-claro .idioma-opcao {
+    color: #1e293b !important;
+    background: #fff !important;
+}
+
+html.modo-claro .idioma-opcao:hover {
+    background: #e2e8f0 !important;
+}
+
+html.modo-claro .idioma-opcao.active {
+    background: #3b82f6 !important;
+    color: #fff !important;
+}
+
+/* Alertas no modo claro */
+html.modo-claro .alerta {
+    background: #fff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .alerta h3 {
+    color: #1e293b !important;
+}
+
+html.modo-claro .alerta .numero {
+    color: #1e293b !important;
+}
+
+html.modo-claro .alerta .descricao {
+    color: #64748b !important;
+}
+
+/* Cards e containers com borda */
+html.modo-claro .form-card {
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .notinhas-table {
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .filtros {
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .grafico-card,
+html.modo-claro .ranking-card {
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .metrica-card {
+    border: 1px solid #e2e8f0 !important;
+}
+
+/* Tabs no modo claro */
+html.modo-claro .tabs {
+    background: #fff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .tab-btn {
+    color: #64748b !important;
+}
+
+html.modo-claro .tab-btn:hover {
+    color: #1e293b !important;
+}
+
+html.modo-claro .tab-btn.active {
+    color: #3b82f6 !important;
+    border-bottom-color: #3b82f6 !important;
+}
+
+/* Badges no modo claro */
+html.modo-claro .badge {
+    background: #e2e8f0;
+    color: #64748b;
+}
+
+/* Botões de ação no modo claro */
+html.modo-claro .btn-acao {
+    border: 1px solid transparent;
+}
+
+html.modo-claro .btn-cobrar-todos {
+    background: #22c55e;
+    color: #fff;
+}
+
+/* Form inputs placeholders */
+html.modo-claro input::placeholder,
+html.modo-claro textarea::placeholder {
+    color: #94a3b8;
+}
+
+/* Autocomplete no modo claro */
+html.modo-claro .autocomplete-list {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+html.modo-claro .autocomplete-item:hover {
+    background: #f1f5f9;
+}
+
+/* Status badges mais visíveis */
+html.modo-claro .status-badge {
+    border: 1px solid currentColor;
+}
+
+/* Banner de notificação */
+html.modo-claro .banner-notificacao,
+html.modo-claro .banner-lembretes {
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Info boxes */
+html.modo-claro .info-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+}
+
+html.modo-claro .info-box code {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+/* Header title no modo claro */
+html.modo-claro h1 {
+    color: #1e293b;
+}
+
+/* Separador da acessibilidade */
+html.modo-claro .acessibilidade-separador {
+    background: #cbd5e1;
+}
+
+/* Notinhas detalhes */
+html.modo-claro .notinha-detalhes {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+html.modo-claro .detalhe-cliente {
+    border-color: #e2e8f0;
+}
+
+html.modo-claro .detalhe-nome {
+    color: #1e293b;
+}
+
+html.modo-claro .detalhe-telefone {
+    color: #64748b;
+}
+
+/* Cliente row edicao */
+html.modo-claro .cliente-row-edicao {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+html.modo-claro .cliente-acoes-edicao {
+    border-color: #e2e8f0;
+}
+
+/* Info sections */
+html.modo-claro .info-lixeira,
+html.modo-claro .info-inadimplentes,
+html.modo-claro .info-recebidos {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+html.modo-claro .info-lixeira p,
+html.modo-claro .info-inadimplentes p,
+html.modo-claro .info-recebidos p {
+    color: #64748b;
+}
+
+/* Resumo cards - manter o gradiente original */
+html.modo-claro .inadimplentes-resumo .resumo-card {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    border: none !important;
+}
+
+html.modo-claro .recebidos-resumo .resumo-card {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+    border: none !important;
+}
+
+/* Dashboard específico */
+html.modo-claro .ranking-item {
+    background: #f8fafc;
+}
+
+html.modo-claro .ranking-item:hover {
+    background: #f1f5f9;
+}
+
+html.modo-claro .ranking-nome {
+    color: #1e293b;
+}
+
+html.modo-claro .vencimento-item {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+html.modo-claro .vencimento-cliente {
+    color: #1e293b;
+}
+
+/* Parcelas */
+html.modo-claro .parcelas-datas-container {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+html.modo-claro .parcela-data-item {
+    background: #fff;
+}
+
+html.modo-claro .parcela-data-item input {
+    background: #fff;
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+
+/* Clientes lista */
+html.modo-claro .clientes-lista {
+    background: #fff;
+    border-color: #e2e8f0;
+}
+
+html.modo-claro .cliente-item {
+    border-color: #e2e8f0;
+}
+
+html.modo-claro .cliente-item:hover {
+    background: #f8fafc;
+}
+
+html.modo-claro .cliente-nome,
+html.modo-claro .cliente-item-nome {
+    color: #1e293b !important;
+}
+
+html.modo-claro .cliente-telefone,
+html.modo-claro .cliente-item-telefone {
+    color: #64748b !important;
+}
+
+/* Lista de clientes */
+html.modo-claro .clientes-lista {
+    background: #fff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .clientes-lista-header {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+html.modo-claro .cliente-item {
+    border-color: #e2e8f0 !important;
+}
+
+html.modo-claro .cliente-item:hover {
+    background: #f8fafc !important;
+}
+
+html.modo-claro .cliente-item-acoes button {
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+html.modo-claro .cliente-item-acoes button:hover {
+    background: #e2e8f0 !important;
+}
+
+/* Inadimplentes */
+html.modo-claro .info-inadimplentes {
+    background: #fff8f0 !important;
+    border: 1px solid #fde68a !important;
+}
+
+html.modo-claro .info-inadimplentes p {
+    color: #92400e !important;
+}
+
+html.modo-claro .inadimplentes-lista {
+    background: #fff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+/* Paginação */
+html.modo-claro .paginacao button {
+    background: #fff;
+    border-color: #cbd5e1;
+    color: #1e293b;
+}
+
+html.modo-claro .paginacao button:hover {
+    background: #f1f5f9;
+}
+
+html.modo-claro .paginacao button.active {
+    background: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+}
+
+/* ==================== ATALHOS DE TECLADO - MODAL ==================== */
+.modal-atalhos {
+    max-width: 500px;
+}
+
+.atalhos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.atalho-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+}
+
+.atalho-tecla {
+    display: flex;
+    gap: 5px;
+}
+
+.tecla {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #fff;
+}
+
+.atalho-descricao {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* ==================== RESPONSIVO ==================== */
+@media (max-width: 768px) {
+    .header-buttons {
+        gap: 5px;
+    }
+    
+    .btn-config span {
+        display: none;
+    }
+    
+    .acessibilidade-dropdown {
+        right: -50px;
+    }
+}
+

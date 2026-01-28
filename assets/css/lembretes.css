@@ -1,0 +1,343 @@
+/* ==================== BANNER LEMBRETES ==================== */
+.banner-lembretes {
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    animation: slideDown 0.3s ease;
+}
+
+.banner-lembretes .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.banner-lembretes .banner-icon {
+    font-size: 2rem;
+}
+
+.banner-lembretes .banner-texto {
+    flex: 1;
+}
+
+.banner-lembretes .banner-texto strong {
+    font-size: 1rem;
+    color: #fff;
+}
+
+.banner-lembretes .banner-texto p {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.9);
+    margin-top: 3px;
+}
+
+.btn-ver-lembretes {
+    background: #fff;
+    color: #7c3aed;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-ver-lembretes:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* Parcelas Preview */
+.parcelas-preview {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+}
+
+.parcelas-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #60a5fa;
+    font-size: 0.85rem;
+}
+
+.parcelas-info span:last-child {
+    font-weight: 600;
+}
+
+/* Form Group Small */
+.form-group-small {
+    max-width: 120px;
+}
+
+.form-group-small select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.form-group-small select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Cliente Row Completo (com parcelas) */
+.cliente-row-completo {
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.cliente-row-completo .cliente-row {
+    margin-bottom: 10px;
+}
+
+.cliente-parcelas-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255,255,255,0.1);
+}
+
+.parcela-grupo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.parcela-grupo label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.parcela-grupo select,
+.parcela-grupo input[type="date"] {
+    padding: 6px 10px;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    background: #0f172a;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+}
+
+.parcela-grupo select {
+    min-width: 90px;
+}
+
+.parcela-grupo input[type="date"] {
+    min-width: 140px;
+}
+
+/* Container de datas das parcelas */
+.parcelas-datas-container {
+    background: rgba(124, 58, 237, 0.1);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 12px;
+}
+
+.parcelas-datas-header {
+    margin-bottom: 15px;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.parcelas-datas-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.parcela-data-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.05);
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.parcela-data-item label {
+    font-size: 0.85rem;
+    color: #a78bfa;
+    white-space: nowrap;
+    min-width: 90px;
+    font-weight: 500;
+}
+
+.parcela-data-item input[type="date"] {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    background: #0f172a;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    max-width: 200px;
+}
+
+.parcela-data-item input[type="date"]:focus {
+    border-color: #a78bfa;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
+}
+
+/* Responsivo para telas menores */
+@media (min-width: 768px) {
+    .parcelas-datas-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .parcelas-datas-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.parcela-preview {
+    margin-left: auto;
+}
+
+.parcela-info-texto {
+    background: rgba(124, 58, 237, 0.2);
+    color: #a78bfa;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Info box parcelas */
+.info-parcelas-cliente {
+    background: rgba(124, 58, 237, 0.1);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+    color: #a78bfa;
+}
+
+/* Parcelas na Lista de Notinhas */
+.parcela-badge {
+    background: rgba(124, 58, 237, 0.2);
+    color: #a78bfa;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/* Detalhes das Parcelas */
+.parcelas-detalhes {
+    background: rgba(124, 58, 237, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.parcelas-titulo {
+    color: #a78bfa;
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+}
+
+.parcela-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.parcela-item:last-child {
+    margin-bottom: 0;
+}
+
+.parcela-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.parcela-numero {
+    background: rgba(124, 58, 237, 0.3);
+    color: #a78bfa;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.parcela-data {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.parcela-valor {
+    color: #fff;
+    font-weight: 600;
+}
+
+.parcela-status {
+    margin-left: 10px;
+}
+
+.parcela-paga {
+    opacity: 0.6;
+}
+
+.parcela-paga .parcela-numero {
+    background: rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+}
+
+.btn-pagar-parcela {
+    background: #22c55e;
+    color: #fff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-pagar-parcela:hover {
+    background: #16a34a;
+}
+

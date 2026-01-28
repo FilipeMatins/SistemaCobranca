@@ -1,0 +1,186 @@
+/* ==================== MODAL COBRANÇA ==================== */
+.modal-cobranca {
+    max-width: 450px;
+    text-align: center;
+}
+
+.cobranca-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.cobranca-header h2 {
+    margin: 0;
+}
+
+.cobranca-progresso {
+    background: #3b82f6;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.cobranca-barra-container {
+    background: #334155;
+    border-radius: 10px;
+    height: 8px;
+    margin-bottom: 25px;
+    overflow: hidden;
+}
+
+.cobranca-barra {
+    background: linear-gradient(90deg, #22c55e, #3b82f6);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.cobranca-cliente {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.cobranca-info {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #1e293b;
+}
+
+.cobranca-info:last-child {
+    border-bottom: none;
+}
+
+.cobranca-label {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.cobranca-nome {
+    font-weight: 600;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.badge-reenvio {
+    background: #f59e0b;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.cobranca-valor {
+    color: #22c55e;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.cobranca-telefone {
+    color: #94a3b8;
+}
+
+.cobranca-empresa {
+    color: #60a5fa;
+}
+
+.cobranca-instrucao {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-bottom: 20px;
+}
+
+.cobranca-botoes {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-pular {
+    flex: 1;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid #64748b;
+    color: #64748b;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn-pular:hover {
+    background: #64748b;
+    color: #fff;
+}
+
+.btn-enviar-cobranca {
+    flex: 2;
+    padding: 14px 20px;
+    background: #22c55e;
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.btn-enviar-cobranca:hover {
+    background: #16a34a;
+    transform: scale(1.02);
+}
+
+.btn-proximo {
+    flex: 2;
+    padding: 14px 20px;
+    background: #3b82f6;
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s;
+    animation: pulseBtn 1s infinite;
+}
+
+.btn-proximo:hover {
+    background: #2563eb;
+}
+
+@keyframes pulseBtn {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+}
+
+.btn-fechar-cobranca {
+    margin-top: 15px;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 10px;
+    transition: color 0.2s;
+}
+
+.btn-fechar-cobranca:hover {
+    color: #fff;
+}
+

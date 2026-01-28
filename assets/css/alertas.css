@@ -1,0 +1,156 @@
+/* ==================== ALERTAS ==================== */
+.alertas {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.alerta {
+    flex: 1;
+    padding: 15px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.alerta:hover {
+    transform: translateY(-2px);
+}
+
+.alerta-hoje {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.alerta-atrasado {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+}
+
+.alerta-total {
+    background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+}
+
+.alerta-total .numero {
+    font-size: 1.3rem;
+}
+
+.alerta-icon {
+    font-size: 1.5rem;
+}
+
+.alerta-info h3 {
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.alerta-info .numero {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.btn-cobrar-todos {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-cobrar-todos:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+}
+
+.btn-cobrar-todos:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ==================== BANNER DE NOTIFICAÇÃO ==================== */
+.banner-notificacao {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    animation: slideDown 0.3s ease, pulse-banner 2s infinite;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-banner {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.banner-icon {
+    font-size: 2rem;
+}
+
+.banner-texto {
+    flex: 1;
+}
+
+.banner-texto strong {
+    font-size: 1rem;
+    color: #fff;
+}
+
+.banner-texto p {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.9);
+    margin-top: 3px;
+}
+
+.btn-cobrar-banner {
+    background: #fff;
+    color: #d97706;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-cobrar-banner:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.btn-fechar-banner {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    transition: all 0.2s;
+}
+
+.btn-fechar-banner:hover {
+    color: #fff;
+}
+
