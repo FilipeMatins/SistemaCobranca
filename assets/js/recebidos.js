@@ -1,6 +1,8 @@
 // ==================== RECEBIDOS ====================
 
 let recebidosCache = [];
+let totalRecebidoMesOriginal = 0;
+let totalRecebidoGeralOriginal = 0;
 
 async function carregarRecebidos() {
     try {
@@ -10,9 +12,19 @@ async function carregarRecebidos() {
         if (data.success) {
             recebidosCache = data.recebidos || [];
             
-            // Atualiza totais
-            document.getElementById('total-recebido-mes').textContent = formatarMoeda(data.totalMes || 0);
-            document.getElementById('total-recebido-geral').textContent = formatarMoeda(data.totalGeral || 0);
+            // Guarda totais originais vindos da API
+            totalRecebidoMesOriginal = data.totalMes || 0;
+            totalRecebidoGeralOriginal = data.totalGeral || 0;
+            
+            // Atualiza totais iniciais (sem filtro)
+            const elTotalMes = document.getElementById('total-recebido-mes');
+            const elTotalGeral = document.getElementById('total-recebido-geral');
+            if (elTotalMes) {
+                elTotalMes.textContent = formatarValor(totalRecebidoMesOriginal);
+            }
+            if (elTotalGeral) {
+                elTotalGeral.textContent = formatarValor(totalRecebidoGeralOriginal);
+            }
             
             // Atualiza badge
             const badge = document.getElementById('badge-recebidos');
@@ -54,6 +66,28 @@ function renderizarRecebidos() {
         });
     }
     
+    // Atualiza totais conforme filtro (total do filtro no card "Recebido este Mês")
+    const totalFiltrado = recebidosFiltrados.reduce((sumNotinhas, n) => {
+        const totalNotinha = parseFloat(n.total_recebido || 0);
+        return sumNotinhas + totalNotinha;
+    }, 0);
+    
+    const elTotalMes = document.getElementById('total-recebido-mes');
+    const elTotalGeral = document.getElementById('total-recebido-geral');
+    const temFiltro = !!busca || !!mesFiltro;
+    
+    if (elTotalMes) {
+        if (temFiltro) {
+            elTotalMes.textContent = formatarValor(totalFiltrado);
+        } else {
+            elTotalMes.textContent = formatarValor(totalRecebidoMesOriginal || 0);
+        }
+    }
+    if (elTotalGeral) {
+        // Mantém sempre o total histórico vindo da API
+        elTotalGeral.textContent = formatarValor(totalRecebidoGeralOriginal || 0);
+    }
+    
     if (recebidosFiltrados.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -66,7 +100,7 @@ function renderizarRecebidos() {
     
     container.innerHTML = recebidosFiltrados.map(n => {
         const clientes = n.clientes || [];
-        const total = clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+        const total = parseFloat(n.total_recebido || 0);
         const dataRecebido = n.recebido_at ? new Date(n.recebido_at).toLocaleDateString('pt-BR') : '-';
         
         return `
@@ -74,7 +108,7 @@ function renderizarRecebidos() {
                 <div class="notinha-main">
                     <span class="empresa-nome">${n.empresa_nome || 'Sem empresa'}</span>
                     <span class="clientes-nomes">${clientes.map(c => c.nome).join(', ') || '-'}</span>
-                    <span class="total">${formatarMoeda(total)}</span>
+                    <span class="total">${formatarValor(total)}</span>
                     <span class="data-recebimento">${dataRecebido}</span>
                     <div class="acoes">
                         <button class="btn-desfazer-recebido" onclick="desfazerRecebido(${n.id})" title="Desfazer recebimento">
@@ -87,29 +121,7 @@ function renderizarRecebidos() {
     }).join('');
 }
 
-async function marcarComoRecebido(id) {
-    if (!confirm('Confirma que recebeu o pagamento desta notinha?')) return;
-    
-    try {
-        const response = await fetch('api/recebidos.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, acao: 'receber' })
-        });
-        
-        const result = await response.json();
-        if (result.success) {
-            showToast('✅ Marcado como recebido!');
-            carregarNotinhas();
-            carregarRecebidos();
-            carregarDashboard();
-        } else {
-            showToast(result.error || 'Erro ao marcar como recebido', 'error');
-        }
-    } catch (error) {
-        showToast('Erro de conexão', 'error');
-    }
-}
+// A função marcarComoRecebido(id) agora é definida em notinhas.js
 
 async function desfazerRecebido(id) {
     if (!confirm('Deseja desfazer o recebimento? A notinha voltará para a lista ativa.')) return;
@@ -153,4 +165,5 @@ document.addEventListener('DOMContentLoaded', () => {
         mesRecebidos.addEventListener('change', renderizarRecebidos);
     }
 });
+
 

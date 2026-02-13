@@ -8,10 +8,12 @@ use App\Models\Configuracao;
 class ConfiguracaoController extends Controller
 {
     private Configuracao $model;
+    private ?int $usuarioId;
     
-    public function __construct()
+    public function __construct(?int $usuarioId = null)
     {
-        $this->model = new Configuracao();
+        $this->usuarioId = $usuarioId;
+        $this->model = new Configuracao($usuarioId);
     }
     
     public function index(): void

@@ -22,3 +22,4 @@ CREATE INDEX IF NOT EXISTS idx_clientes_deleted ON notinha_clientes(deleted_at);
 -- Mensagem de sucesso
 SELECT 'Banco de dados atualizado com sucesso!' as status;
 
+

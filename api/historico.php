@@ -4,6 +4,11 @@ header('Access-Control-Allow-Origin: *');
 
 require_once '../app/autoload.php';
 use App\Core\Database;
+use App\Core\Auth;
+
+// Verificar se está logado
+Auth::verificarLoginAPI();
+$usuarioId = Auth::getUsuarioId();
 
 try {
     $pdo = Database::getInstance();
@@ -17,7 +22,7 @@ try {
     
     $hoje = date('Y-m-d');
     
-    // Buscar todas as compras do cliente
+    // Buscar todas as compras do cliente (do usuário logado)
     $sql = "
         SELECT 
             nc.valor,
@@ -30,10 +35,11 @@ try {
         WHERE nc.nome = ?
         AND n.deleted_at IS NULL
         AND nc.deleted_at IS NULL
+        AND n.usuario_id = ?
         ORDER BY n.data_cobranca DESC
     ";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$nome]);
+    $stmt->execute([$nome, $usuarioId]);
     $compras = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Calcular métricas

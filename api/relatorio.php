@@ -4,6 +4,11 @@ header('Access-Control-Allow-Origin: *');
 
 require_once '../app/autoload.php';
 use App\Core\Database;
+use App\Core\Auth;
+
+// Verificar se está logado
+Auth::verificarLoginAPI();
+$usuarioId = Auth::getUsuarioId();
 
 $pdo = Database::getInstance();
 
@@ -22,8 +27,9 @@ try {
         WHERE n.data_cobranca BETWEEN ? AND ?
         AND n.deleted_at IS NULL
         AND nc.deleted_at IS NULL
+        AND n.usuario_id = ?
     ");
-    $stmt->execute([$primeiroDia, $ultimoDia]);
+    $stmt->execute([$primeiroDia, $ultimoDia, $usuarioId]);
     $totalLancado = $stmt->fetch()['total'];
     
     // Total Recebido (recebido no mês)
@@ -33,8 +39,9 @@ try {
         JOIN notinhas n ON nc.notinha_id = n.id
         WHERE n.recebido_at BETWEEN ? AND ?
         AND nc.deleted_at IS NULL
+        AND n.usuario_id = ?
     ");
-    $stmt->execute([$primeiroDia . ' 00:00:00', $ultimoDia . ' 23:59:59']);
+    $stmt->execute([$primeiroDia . ' 00:00:00', $ultimoDia . ' 23:59:59', $usuarioId]);
     $totalRecebido = $stmt->fetch()['total'];
     
     // Total Inadimplente (marcado como inadimplente no mês)
@@ -44,8 +51,9 @@ try {
         JOIN notinhas n ON nc.notinha_id = n.id
         WHERE n.inadimplente_at BETWEEN ? AND ?
         AND nc.deleted_at IS NULL
+        AND n.usuario_id = ?
     ");
-    $stmt->execute([$primeiroDia . ' 00:00:00', $ultimoDia . ' 23:59:59']);
+    $stmt->execute([$primeiroDia . ' 00:00:00', $ultimoDia . ' 23:59:59', $usuarioId]);
     $totalInadimplente = $stmt->fetch()['total'];
     
     // Total Pendente (vencimento no mês, não recebido, não inadimplente)
@@ -58,8 +66,9 @@ try {
         AND n.inadimplente_at IS NULL
         AND n.deleted_at IS NULL
         AND nc.deleted_at IS NULL
+        AND n.usuario_id = ?
     ");
-    $stmt->execute([$primeiroDia, $ultimoDia]);
+    $stmt->execute([$primeiroDia, $ultimoDia, $usuarioId]);
     $totalPendente = $stmt->fetch()['total'];
     
     // Detalhamento
@@ -83,9 +92,10 @@ try {
             WHERE n.data_cobranca BETWEEN ? AND ?
             AND n.deleted_at IS NULL
             AND nc.deleted_at IS NULL
+            AND n.usuario_id = ?
             ORDER BY n.data_cobranca, e.nome, nc.nome
         ");
-        $stmt->execute([$primeiroDia, $ultimoDia]);
+        $stmt->execute([$primeiroDia, $ultimoDia, $usuarioId]);
         $notinhas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     

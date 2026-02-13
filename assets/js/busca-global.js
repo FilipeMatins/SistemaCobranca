@@ -189,3 +189,4 @@ function onBuscaGlobalInput() {
     timeoutBusca = setTimeout(executarBuscaGlobal, 300);
 }
 
+

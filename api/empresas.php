@@ -16,8 +16,13 @@ require_once __DIR__ . '/../app/autoload.php';
 
 use App\Controllers\EmpresaController;
 use App\Core\Response;
+use App\Core\Auth;
 
-$controller = new EmpresaController();
+// Verificar se está logado
+Auth::verificarLoginAPI();
+$usuarioId = Auth::getUsuarioId();
+
+$controller = new EmpresaController($usuarioId);
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {

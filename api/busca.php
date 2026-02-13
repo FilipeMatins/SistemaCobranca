@@ -4,6 +4,11 @@ header('Access-Control-Allow-Origin: *');
 
 require_once '../app/autoload.php';
 use App\Core\Database;
+use App\Core\Auth;
+
+// Verificar se está logado
+Auth::verificarLoginAPI();
+$usuarioId = Auth::getUsuarioId();
 
 $pdo = Database::getInstance();
 
@@ -44,11 +49,12 @@ try {
         JOIN empresas e ON n.empresa_id = e.id
         LEFT JOIN notinha_clientes nc ON nc.notinha_id = n.id AND nc.deleted_at IS NULL
         WHERE (e.nome LIKE ? OR nc.nome LIKE ?)
+        AND n.usuario_id = ?
         GROUP BY n.id
         ORDER BY n.data_cobranca DESC
         LIMIT 20
     ");
-    $stmt->execute([$hoje, $hoje, $termoBusca, $termoBusca]);
+    $stmt->execute([$hoje, $hoje, $termoBusca, $termoBusca, $usuarioId]);
     $notinhas = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Adicionar classe e texto do status
@@ -91,12 +97,13 @@ try {
         FROM clientes c
         LEFT JOIN notinha_clientes nc ON nc.nome = c.nome AND nc.deleted_at IS NULL
         LEFT JOIN notinhas n ON nc.notinha_id = n.id AND n.deleted_at IS NULL
-        WHERE c.nome LIKE ? OR c.telefone LIKE ?
+        WHERE (c.nome LIKE ? OR c.telefone LIKE ?)
+        AND c.usuario_id = ?
         GROUP BY c.id
         ORDER BY c.nome
         LIMIT 20
     ");
-    $stmt->execute([$termoBusca, $termoBusca]);
+    $stmt->execute([$termoBusca, $termoBusca, $usuarioId]);
     $resultados['clientes'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Buscar empresas
@@ -107,11 +114,12 @@ try {
         FROM empresas e
         LEFT JOIN notinhas n ON n.empresa_id = e.id AND n.deleted_at IS NULL
         WHERE e.nome LIKE ?
+        AND e.usuario_id = ?
         GROUP BY e.id
         ORDER BY e.nome
         LIMIT 10
     ");
-    $stmt->execute([$termoBusca]);
+    $stmt->execute([$termoBusca, $usuarioId]);
     $resultados['empresas'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode($resultados);

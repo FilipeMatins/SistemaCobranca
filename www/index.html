@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bloco de Cobranças</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        
+        /* Tela de carregamento */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        .loading-text {
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-top: 30px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Tela de erro */
+        .error-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 9998;
+        }
+        
+        .error-screen.visible {
+            display: flex;
+        }
+        
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .error-message {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            max-width: 300px;
+        }
+        
+        .retry-btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .retry-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* WebView Container */
+        .webview-container {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        
+        .webview-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de carregamento -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-icon">📝</div>
+        <div class="loading-text">Bloco de Cobranças</div>
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- Tela de erro -->
+    <div class="error-screen" id="errorScreen">
+        <div class="error-icon">📡</div>
+        <div class="error-title">Sem conexão</div>
+        <div class="error-message">
+            Não foi possível conectar ao servidor. Verifique sua conexão com a internet e tente novamente.
+        </div>
+        <button class="retry-btn" onclick="loadApp()">Tentar novamente</button>
+    </div>
+    
+    <!-- Container do app -->
+    <div class="webview-container" id="webviewContainer" style="display: none;"></div>
+    
+    <script src="capacitor.js"></script>
+    <script>
+        // Configuração do servidor
+        // Em desenvolvimento: localhost
+        // Em produção: URL do servidor hospedado
+        const CONFIG = {
+            // Mude esta URL para o endereço do seu servidor quando hospedar online
+            serverUrl: 'http://localhost/SistemaCobranca/',
+            // Timeout em milissegundos
+            timeout: 15000
+        };
+        
+        // Detectar se está rodando no Capacitor (app nativo)
+        const isNative = window.Capacitor && window.Capacitor.isNativePlatform();
+        
+        // Função para carregar o app
+        async function loadApp() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const errorScreen = document.getElementById('errorScreen');
+            const webviewContainer = document.getElementById('webviewContainer');
+            
+            // Mostrar loading, esconder erro
+            loadingScreen.classList.remove('hidden');
+            errorScreen.classList.remove('visible');
+            
+            try {
+                // Se não estiver no app nativo, redirecionar diretamente
+                if (!isNative) {
+                    window.location.href = CONFIG.serverUrl;
+                    return;
+                }
+                
+                // Verificar conexão com o servidor
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), CONFIG.timeout);
+                
+                const response = await fetch(CONFIG.serverUrl + 'api/auth.php?action=verificar', {
+                    method: 'GET',
+                    signal: controller.signal,
+                    credentials: 'include'
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    // Servidor disponível - criar iframe ou redirecionar
+                    loadingScreen.classList.add('hidden');
+                    
+                    // Usar Browser plugin para abrir no navegador interno
+                    if (window.Capacitor && window.Capacitor.Plugins.Browser) {
+                        await window.Capacitor.Plugins.Browser.open({ 
+                            url: CONFIG.serverUrl,
+                            presentationStyle: 'fullscreen'
+                        });
+                    } else {
+                        // Fallback: usar iframe
+                        webviewContainer.innerHTML = `<iframe src="${CONFIG.serverUrl}" allow="camera; microphone"></iframe>`;
+                        webviewContainer.style.display = 'block';
+                    }
+                } else {
+                    throw new Error('Server not available');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao conectar:', error);
+                loadingScreen.classList.add('hidden');
+                errorScreen.classList.add('visible');
+            }
+        }
+        
+        // Iniciar quando o DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar StatusBar no app nativo
+            if (isNative && window.Capacitor.Plugins.StatusBar) {
+                window.Capacitor.Plugins.StatusBar.setBackgroundColor({ color: '#0f172a' });
+                window.Capacitor.Plugins.StatusBar.setStyle({ style: 'DARK' });
+            }
+            
+            // Esconder splash screen nativa
+            if (isNative && window.Capacitor.Plugins.SplashScreen) {
+                window.Capacitor.Plugins.SplashScreen.hide();
+            }
+            
+            // Carregar o app
+            setTimeout(loadApp, 500);
+        });
+        
+        // Lidar com botão de voltar no Android
+        if (isNative && window.Capacitor.Plugins.App) {
+            window.Capacitor.Plugins.App.addListener('backButton', ({ canGoBack }) => {
+                if (!canGoBack) {
+                    window.Capacitor.Plugins.App.exitApp();
+                } else {
+                    window.history.back();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+

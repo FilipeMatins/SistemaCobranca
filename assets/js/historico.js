@@ -119,3 +119,4 @@ function renderizarListaClientesComHistorico() {
     renderizarPaginacao();
 }
 
+

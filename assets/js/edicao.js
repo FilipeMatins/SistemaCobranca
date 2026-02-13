@@ -217,43 +217,18 @@ function cobrarClienteEdicao(telefone, nome, valor, clienteId) {
     enviarWhatsApp(telefone, nome, valor, clienteId);
 }
 
-// Marcar cliente específico como recebido
+// Marcar cliente específico como recebido (com valor editável / parcial)
 async function marcarClienteRecebido(clienteId) {
-    if (!confirm('Marcar este cliente como recebido?')) return;
+    const cliente = clientesEdicao.find(c => c.id == clienteId);
+    if (!cliente) return;
     
-    try {
-        const response = await fetch('api/notinhas.php', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                action: 'receber_cliente', 
-                cliente_id: clienteId 
-            })
-        });
-        
-        const result = await response.json();
-        if (result.success) {
-            showToast('✅ Cliente marcado como recebido!');
-            
-            // Remove o cliente da lista de edição
-            clientesEdicao = clientesEdicao.filter(c => c.id != clienteId);
-            renderizarClientesEdicao();
-            
-            // Se não sobrou nenhum cliente, a notinha toda foi para recebidos
-            if (clientesEdicao.filter(c => c.existente).length === 0) {
-                showToast('📋 Notinha movida para Recebidos!');
-                fecharEdicao();
-            }
-            
-            // Atualiza as listas
-            carregarNotinhas();
-            carregarRecebidos();
-        } else {
-            showToast(result.error || 'Erro ao marcar como recebido', 'error');
-        }
-    } catch (error) {
-        showToast('Erro de conexão', 'error');
-    }
+    const valorNumero = cliente.valorNumerico ? cliente.valorNumerico : parseFloat(String(cliente.valor).replace('.', '').replace(',', '.')) || 0;
+    const notinhaId = notinhaIdEdicao;
+    if (!notinhaId) return;
+    
+    const descricao = `Valor recebido do cliente "${cliente.nome}" na notinha da empresa "${document.getElementById('editar-empresa').value}". Você pode ajustar o valor se recebeu apenas uma parte.`;
+    
+    abrirModalRecebimento(notinhaId, valorNumero, descricao);
 }
 
 async function salvarEdicao() {

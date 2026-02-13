@@ -8,10 +8,12 @@ use App\Models\Empresa;
 class EmpresaController extends Controller
 {
     private Empresa $model;
+    private ?int $usuarioId;
     
-    public function __construct()
+    public function __construct(?int $usuarioId = null)
     {
-        $this->model = new Empresa();
+        $this->usuarioId = $usuarioId;
+        $this->model = new Empresa($usuarioId);
     }
     
     public function index(): void

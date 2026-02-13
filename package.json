@@ -1,0 +1,36 @@
+{
+  "name": "bloco-de-cobrancas",
+  "version": "1.0.0",
+  "description": "Sistema de gerenciamento de cobranças via WhatsApp",
+  "main": "service-worker.js",
+  "scripts": {
+    "build": "npx cap sync",
+    "build:android": "npx cap sync android",
+    "build:ios": "npx cap sync ios",
+    "open:android": "npx cap open android",
+    "open:ios": "npx cap open ios",
+    "run:android": "npx cap run android",
+    "run:ios": "npx cap run ios"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FilipeMatins/SistemaCobranca.git"
+  },
+  "keywords": ["cobranca", "whatsapp", "pwa", "app"],
+  "author": "Filipe Martins",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FilipeMatins/SistemaCobranca/issues"
+  },
+  "homepage": "https://github.com/FilipeMatins/SistemaCobranca#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/browser": "^8.0.0",
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/ios": "^8.0.2",
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0"
+  }
+}

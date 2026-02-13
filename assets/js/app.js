@@ -73,9 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
             fecharModalAtalhos();
             fecharBuscaGlobal();
             fecharModalRelatorio();
+            fecharModalRecebimento();
         }
         
-        // Enter para enviar promoção
+        // Enter para confirmar envio de promoção
         if (e.key === 'Enter' && document.getElementById('modal-envio-promocao').classList.contains('show')) {
             const btnEnviar = document.getElementById('btn-enviar-promocao');
             const btnProximo = document.getElementById('btn-proximo-promocao');
@@ -85,6 +86,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (btnProximo.style.display !== 'none') {
                 proximaPromocao();
             }
+        }
+        
+        // Enter para confirmar recebimento (quando modal estiver aberto)
+        if (e.key === 'Enter' && document.getElementById('modal-recebimento').classList.contains('show')) {
+            e.preventDefault();
+            confirmarRecebimento();
         }
     });
 });

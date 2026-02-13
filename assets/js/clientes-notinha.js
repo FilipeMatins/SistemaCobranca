@@ -1,4 +1,37 @@
 // ==================== CLIENTES DA NOTINHA (FORMULÁRIO) ====================
+
+// Navegação entre campos com Tab ou Enter
+function navegarCampo(event, proximoCampoId) {
+    // Tab navega para o próximo campo
+    if (event.key === 'Tab' && !event.shiftKey) {
+        event.preventDefault();
+        event.stopPropagation();
+        setTimeout(() => {
+            const proximoCampo = document.getElementById(proximoCampoId);
+            if (proximoCampo) {
+                proximoCampo.focus();
+            }
+        }, 10);
+    }
+    // Enter também navega para o próximo campo
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        event.stopPropagation();
+        setTimeout(() => {
+            const proximoCampo = document.getElementById(proximoCampoId);
+            if (proximoCampo) {
+                proximoCampo.focus();
+            }
+        }, 10);
+    }
+}
+
+// Atualizar valor sem re-renderizar (evita perder foco)
+function atualizarValorCliente(id, valor) {
+    const cliente = clientes.find(c => c.id === id);
+    if (cliente) cliente.valor = valor;
+}
+
 async function buscarClientes(termo, clienteId) {
     try {
         const response = await fetch(`api/clientes.php?termo=${encodeURIComponent(termo)}`);
@@ -111,12 +144,14 @@ function renderizarClientes() {
             <div class="cliente-row">
                 <div class="nome-wrapper">
                     <input type="text" id="cliente-nome-${c.id}" placeholder="Nome completo"
-                           value="${c.nome}" oninput="onNomeInput(${c.id}, this.value)" autocomplete="off">
+                           value="${c.nome}" oninput="onNomeInput(${c.id}, this.value)" autocomplete="off"
+                           onkeydown="navegarCampo(event, 'cliente-valor-${c.id}')">
                     <div class="autocomplete-list" id="autocomplete-cliente-${c.id}"></div>
                 </div>
-                <input type="text" class="valor" placeholder="R$ 0,00"
-                       value="${c.valor}" oninput="atualizarCliente(${c.id}, 'valor', this.value)" onblur="renderizarClientes()">
-                <input type="text" placeholder="(67) 99999-9999"
+                <input type="text" class="valor" id="cliente-valor-${c.id}" placeholder="R$ 0,00"
+                       value="${c.valor}" oninput="atualizarValorCliente(${c.id}, this.value)"
+                       onkeydown="navegarCampo(event, 'cliente-telefone-${c.id}')">
+                <input type="text" id="cliente-telefone-${c.id}" placeholder="(67) 99999-9999"
                        value="${c.telefone}" oninput="atualizarCliente(${c.id}, 'telefone', this.value)">
                 <button class="btn-remove" onclick="removerCliente(${c.id})">×</button>
             </div>

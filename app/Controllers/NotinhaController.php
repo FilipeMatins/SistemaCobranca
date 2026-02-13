@@ -12,12 +12,14 @@ class NotinhaController extends Controller
     private Notinha $model;
     private Empresa $empresaModel;
     private Cliente $clienteModel;
+    private ?int $usuarioId;
     
-    public function __construct()
+    public function __construct(?int $usuarioId = null)
     {
-        $this->model = new Notinha();
-        $this->empresaModel = new Empresa();
-        $this->clienteModel = new Cliente();
+        $this->usuarioId = $usuarioId;
+        $this->model = new Notinha($usuarioId);
+        $this->empresaModel = new Empresa($usuarioId);
+        $this->clienteModel = new Cliente($usuarioId);
     }
     
     public function index(): void
@@ -61,45 +63,74 @@ class NotinhaController extends Controller
             $notinhasIds = [];
             $temParcelas = false;
             
-            // Processa cada cliente individualmente
+            // Separa clientes à vista dos parcelados
+            $clientesAVista = [];
+            $clientesParcelados = [];
+            
             foreach ($clientes as $cliente) {
                 $nome = trim($cliente['nome'] ?? '');
+                if (empty($nome)) continue;
+                
+                $numParcelas = intval($cliente['parcelas'] ?? 1);
+                
+                if ($numParcelas > 1) {
+                    $clientesParcelados[] = $cliente;
+                } else {
+                    $clientesAVista[] = $cliente;
+                }
+            }
+            
+            // Agrupa clientes à vista por data de cobrança
+            $clientesPorData = [];
+            foreach ($clientesAVista as $cliente) {
+                $dataCobranca = $cliente['datasParcelas'][0] ?? date('Y-m-d');
+                if (!isset($clientesPorData[$dataCobranca])) {
+                    $clientesPorData[$dataCobranca] = [];
+                }
+                $clientesPorData[$dataCobranca][] = $cliente;
+            }
+            
+            // Cria uma notinha para cada data (agrupa clientes à vista da mesma data)
+            foreach ($clientesPorData as $dataCobranca => $clientesDaData) {
+                $notinhaId = $this->model->criar($empresa['id'], $dataCobranca);
+                $notinhasIds[] = $notinhaId;
+                
+                foreach ($clientesDaData as $cliente) {
+                    $nome = trim($cliente['nome']);
+                    $valor = $this->parseValor($cliente['valor'] ?? '0');
+                    $telefone = trim($cliente['telefone'] ?? '');
+                    
+                    $this->model->adicionarCliente($notinhaId, $nome, $valor, $telefone);
+                    $this->clienteModel->salvarOuAtualizar($nome, $telefone);
+                }
+            }
+            
+            // Processa clientes parcelados (cada cliente parcelado tem suas próprias notinhas)
+            foreach ($clientesParcelados as $cliente) {
+                $temParcelas = true;
+                
+                $nome = trim($cliente['nome']);
                 $valor = $this->parseValor($cliente['valor'] ?? '0');
                 $telefone = trim($cliente['telefone'] ?? '');
-                $numParcelas = intval($cliente['parcelas'] ?? 1);
+                $numParcelas = intval($cliente['parcelas']);
                 $datasParcelas = $cliente['datasParcelas'] ?? [date('Y-m-d')];
                 
-                if (empty($nome)) continue;
+                $valorParcela = $valor / $numParcelas;
+                $parcelaOrigemId = null;
                 
                 // Salva cliente no cadastro
                 $this->clienteModel->salvarOuAtualizar($nome, $telefone);
                 
-                if ($numParcelas > 1) {
-                    $temParcelas = true;
-                    // Cria uma notinha para cada parcela
-                    $valorParcela = $valor / $numParcelas;
-                    $parcelaOrigemId = null;
+                for ($i = 0; $i < $numParcelas; $i++) {
+                    $dataParcela = $datasParcelas[$i] ?? date('Y-m-d');
                     
-                    for ($i = 0; $i < $numParcelas; $i++) {
-                        // Usa a data específica de cada parcela
-                        $dataParcela = $datasParcelas[$i] ?? date('Y-m-d');
-                        
-                        // Cria notinha (número da parcela é i+1)
-                        $notinhaId = $this->model->criar($empresa['id'], $dataParcela, $i + 1, $numParcelas, $parcelaOrigemId);
-                        
-                        if ($i === 0) {
-                            $parcelaOrigemId = $notinhaId;
-                        }
-                        
-                        // Adiciona cliente
-                        $this->model->adicionarCliente($notinhaId, $nome, $valorParcela, $telefone);
-                        $notinhasIds[] = $notinhaId;
+                    $notinhaId = $this->model->criar($empresa['id'], $dataParcela, $i + 1, $numParcelas, $parcelaOrigemId);
+                    
+                    if ($i === 0) {
+                        $parcelaOrigemId = $notinhaId;
                     }
-                } else {
-                    // Cliente à vista - cria notinha única
-                    $dataCobranca = $datasParcelas[0] ?? date('Y-m-d');
-                    $notinhaId = $this->model->criar($empresa['id'], $dataCobranca);
-                    $this->model->adicionarCliente($notinhaId, $nome, $valor, $telefone);
+                    
+                    $this->model->adicionarCliente($notinhaId, $nome, $valorParcela, $telefone);
                     $notinhasIds[] = $notinhaId;
                 }
             }

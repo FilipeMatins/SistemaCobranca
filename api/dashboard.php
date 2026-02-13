@@ -4,6 +4,11 @@ header('Access-Control-Allow-Origin: *');
 
 require_once '../app/autoload.php';
 use App\Core\Database;
+use App\Core\Auth;
+
+// Verificar se está logado
+Auth::verificarLoginAPI();
+$usuarioId = Auth::getUsuarioId();
 
 try {
     $pdo = Database::getInstance();
@@ -11,17 +16,17 @@ try {
     $primeiroDiaMes = date('Y-m-01');
     $ultimoDiaMes = date('Y-m-t');
     
-    // 1. Total recebido este mês (notinhas marcadas como recebidas)
+    // 1. Total recebido este mês (somando todos os recebimentos registrados no mês)
     $stmt = $pdo->prepare("
-        SELECT COALESCE(SUM(nc.valor), 0) as total
-        FROM notinha_clientes nc
-        JOIN notinhas n ON nc.notinha_id = n.id
-        WHERE n.recebido_at IS NOT NULL
-        AND MONTH(n.recebido_at) = MONTH(CURRENT_DATE())
-        AND YEAR(n.recebido_at) = YEAR(CURRENT_DATE())
-        AND nc.deleted_at IS NULL
+        SELECT COALESCE(SUM(nr.valor), 0) as total
+        FROM notinha_recebimentos nr
+        JOIN notinhas n ON nr.notinha_id = n.id
+        WHERE MONTH(nr.recebido_em) = MONTH(CURRENT_DATE())
+        AND YEAR(nr.recebido_em) = YEAR(CURRENT_DATE())
+        AND n.deleted_at IS NULL
+        AND nr.usuario_id = ?
     ");
-    $stmt->execute();
+    $stmt->execute([$usuarioId]);
     $recebidoMes = $stmt->fetch()['total'];
     
     // 2. Previsão de recebimentos (pendentes do mês)
@@ -34,25 +39,29 @@ try {
         AND n.deleted_at IS NULL
         AND n.inadimplente_at IS NULL
         AND nc.deleted_at IS NULL
+        AND n.usuario_id = ?
     ");
-    $stmt->execute([$hoje]);
+    $stmt->execute([$hoje, $usuarioId]);
     $previsao = $stmt->fetch()['total'];
     
     // 3. Taxa de inadimplência
-    $stmt = $pdo->query("
-        SELECT COUNT(*) as total FROM notinhas WHERE inadimplente_at IS NOT NULL
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as total FROM notinhas WHERE inadimplente_at IS NOT NULL AND usuario_id = ?
     ");
+    $stmt->execute([$usuarioId]);
     $totalInadimplentes = $stmt->fetch()['total'];
     
-    $stmt = $pdo->query("
-        SELECT COUNT(*) as total FROM notinhas WHERE deleted_at IS NULL
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) as total FROM notinhas WHERE deleted_at IS NULL AND usuario_id = ?
     ");
+    $stmt->execute([$usuarioId]);
     $totalNotinhas = $stmt->fetch()['total'];
     
     $taxaInadimplencia = $totalNotinhas > 0 ? ($totalInadimplentes / $totalNotinhas) * 100 : 0;
     
     // 4. Total de clientes
-    $stmt = $pdo->query("SELECT COUNT(*) as total FROM clientes");
+    $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM clientes WHERE usuario_id = ?");
+    $stmt->execute([$usuarioId]);
     $totalClientes = $stmt->fetch()['total'];
     
     // 5. Vendas por mês - Lançado vs Recebido (3 meses atrás até 2 meses à frente)
@@ -80,28 +89,28 @@ try {
         // Marca o mês atual
         $mesAtual = ($mes === date('Y-m'));
         
-        // Valor LANÇADO (notinhas com VENCIMENTO no mês)
+        // Valor LANÇADO (todas as notinhas com VENCIMENTO no mês - soma todos os clientes, inclusive já recebidos)
         $stmt = $pdo->prepare("
             SELECT COALESCE(SUM(nc.valor), 0) as total
             FROM notinha_clientes nc
             JOIN notinhas n ON nc.notinha_id = n.id
             WHERE n.data_cobranca BETWEEN ? AND ?
             AND n.deleted_at IS NULL
-            AND nc.deleted_at IS NULL
+            AND n.usuario_id = ?
         ");
-        $stmt->execute([$primeiroDia, $ultimoDia]);
+        $stmt->execute([$primeiroDia, $ultimoDia, $usuarioId]);
         $lancado = $stmt->fetch()['total'];
         
-        // Valor RECEBIDO (notinhas RECEBIDAS no mês - independente do vencimento)
+        // Valor RECEBIDO (todos os recebimentos do mês - independente do vencimento)
         $stmt = $pdo->prepare("
-            SELECT COALESCE(SUM(nc.valor), 0) as total
-            FROM notinha_clientes nc
-            JOIN notinhas n ON nc.notinha_id = n.id
-            WHERE n.recebido_at IS NOT NULL
-            AND n.recebido_at BETWEEN ? AND ?
-            AND nc.deleted_at IS NULL
+            SELECT COALESCE(SUM(nr.valor), 0) as total
+            FROM notinha_recebimentos nr
+            JOIN notinhas n ON nr.notinha_id = n.id
+            WHERE nr.recebido_em BETWEEN ? AND ?
+            AND n.deleted_at IS NULL
+            AND nr.usuario_id = ?
         ");
-        $stmt->execute([$primeiroDia . ' 00:00:00', $ultimoDia . ' 23:59:59']);
+        $stmt->execute([$primeiroDia . ' 00:00:00', $ultimoDia . ' 23:59:59', $usuarioId]);
         $recebido = $stmt->fetch()['total'];
         
         $vendasPorMes[] = [
@@ -127,8 +136,9 @@ try {
             WHERE n.inadimplente_at IS NOT NULL
             AND n.inadimplente_at BETWEEN ? AND ?
             AND nc.deleted_at IS NULL
+            AND n.usuario_id = ?
         ");
-        $stmt->execute([$primeiroDia . ' 00:00:00', $ultimoDia . ' 23:59:59']);
+        $stmt->execute([$primeiroDia . ' 00:00:00', $ultimoDia . ' 23:59:59', $usuarioId]);
         $total = $stmt->fetch()['total'];
         
         $inadimplentesPorMes[] = [
@@ -138,7 +148,7 @@ try {
     }
     
     // 7. Top 10 clientes que mais compram
-    $stmt = $pdo->query("
+    $stmt = $pdo->prepare("
         SELECT 
             nc.nome,
             nc.telefone,
@@ -148,10 +158,12 @@ try {
         JOIN notinhas n ON nc.notinha_id = n.id
         WHERE n.deleted_at IS NULL
         AND nc.deleted_at IS NULL
+        AND n.usuario_id = ?
         GROUP BY nc.nome, nc.telefone
         ORDER BY total_gasto DESC
         LIMIT 10
     ");
+    $stmt->execute([$usuarioId]);
     $topClientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // 8. Próximos vencimentos (próximos 7 dias)
@@ -170,10 +182,11 @@ try {
         AND n.deleted_at IS NULL
         AND n.inadimplente_at IS NULL
         AND nc.deleted_at IS NULL
+        AND n.usuario_id = ?
         ORDER BY n.data_cobranca ASC
         LIMIT 10
     ");
-    $stmt->execute([$hoje, $proximaSemana]);
+    $stmt->execute([$hoje, $proximaSemana, $usuarioId]);
     $proximosVencimentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo json_encode([

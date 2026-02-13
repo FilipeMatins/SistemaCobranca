@@ -8,10 +8,12 @@ use App\Models\Cliente;
 class ClienteController extends Controller
 {
     private Cliente $model;
+    private ?int $usuarioId;
     
-    public function __construct()
+    public function __construct(?int $usuarioId = null)
     {
-        $this->model = new Cliente();
+        $this->usuarioId = $usuarioId;
+        $this->model = new Cliente($usuarioId);
     }
     
     public function index(): void

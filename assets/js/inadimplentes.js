@@ -104,3 +104,4 @@ function cobrarInadimplente(telefone, nomeCompleto, valor) {
     window.location.href = `whatsapp://send?phone=${tel}&text=${encodeURIComponent(mensagem)}`;
 }
 
+

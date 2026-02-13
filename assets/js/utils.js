@@ -49,3 +49,4 @@ function getStatus(data) {
     return { classe: 'status-futuro', texto: t('agendado') };
 }
 
+

@@ -4,6 +4,11 @@ header('Access-Control-Allow-Origin: *');
 
 require_once '../app/autoload.php';
 use App\Core\Database;
+use App\Core\Auth;
+
+// Verificar se está logado
+Auth::verificarLoginAPI();
+$usuarioId = Auth::getUsuarioId();
 
 try {
     $pdo = Database::getInstance();
@@ -29,8 +34,9 @@ try {
         AND n.inadimplente_at IS NULL
         AND n.recebido_at IS NULL
         AND nc.deleted_at IS NULL
+        AND n.usuario_id = ?
     ");
-    $stmt->execute([$amanha, $dataLimite]);
+    $stmt->execute([$amanha, $dataLimite, $usuarioId]);
     $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
     
     $response = [
@@ -55,9 +61,10 @@ try {
             AND n.deleted_at IS NULL
             AND n.inadimplente_at IS NULL
             AND n.recebido_at IS NULL
+            AND n.usuario_id = ?
             ORDER BY n.data_cobranca ASC
         ");
-        $stmt->execute([$amanha, $dataLimite]);
+        $stmt->execute([$amanha, $dataLimite, $usuarioId]);
         $notinhas = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // Busca os clientes de cada notinha
@@ -90,10 +97,11 @@ try {
             AND n.inadimplente_at IS NULL
             AND n.recebido_at IS NULL
             AND nc.deleted_at IS NULL
+            AND n.usuario_id = ?
             ORDER BY n.data_cobranca ASC
             LIMIT 20
         ");
-        $stmt->execute([$amanha, $dataLimite]);
+        $stmt->execute([$amanha, $dataLimite, $usuarioId]);
         $response['cobrancas'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     

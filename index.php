@@ -1,3 +1,9 @@
+<?php
+// Verificar autenticação
+require_once __DIR__ . '/app/autoload.php';
+use App\Core\Auth;
+Auth::verificarLogin('login.php');
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -133,6 +139,9 @@
                 </button>
                 <button class="btn-config" onclick="abrirConfiguracoes()">
                     ⚙️ <span data-i18n="configuracoes">Configurações</span>
+                </button>
+                <button class="btn-config btn-logout" onclick="fazerLogout()" title="Sair do sistema">
+                    🚪
                 </button>
             </div>
         </div>
@@ -496,6 +505,15 @@
                 <code>{pix}</code> = <span data-i18n="varPix">Sua chave PIX</span>
             </div>
 
+            <div class="config-section-divider"></div>
+            
+            <div class="config-seguranca">
+                <h3>🔐 Segurança</h3>
+                <button class="btn-alterar-senha" onclick="fecharConfiguracoes(); abrirModalAlterarSenha();">
+                    🔑 Alterar Senha
+                </button>
+            </div>
+
             <div class="modal-buttons">
                 <button class="btn-cancelar" onclick="fecharConfiguracoes()" data-i18n="cancelar">Cancelar</button>
                 <button class="btn-salvar-config" onclick="salvarConfiguracoes()">💾 <span data-i18n="salvar">Salvar</span></button>
@@ -844,6 +862,63 @@
         </div>
     </div>
 
+    <!-- Modal Alterar Senha -->
+    <div class="modal-overlay" id="modal-alterar-senha">
+        <div class="modal" style="max-width: 400px;">
+            <h2>🔑 Alterar Senha</h2>
+            
+            <div class="form-group">
+                <label>Senha Atual</label>
+                <input type="password" id="senha-atual" placeholder="Digite sua senha atual">
+            </div>
+            
+            <div class="form-group">
+                <label>Nova Senha</label>
+                <input type="password" id="nova-senha" placeholder="Senha forte" oninput="verificarForcaSenhaModal()">
+                <div class="password-requirements-modal">
+                    <div id="modal-req-length" class="req-fail">✓ Mínimo 8 caracteres</div>
+                    <div id="modal-req-lower" class="req-fail">✓ Letra minúscula</div>
+                    <div id="modal-req-upper" class="req-fail">✓ Letra maiúscula</div>
+                    <div id="modal-req-number" class="req-fail">✓ Número</div>
+                    <div id="modal-req-special" class="req-fail">✓ Caractere especial</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Confirmar Nova Senha</label>
+                <input type="password" id="confirmar-senha" placeholder="Digite novamente a nova senha">
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn-cancelar" onclick="fecharModalAlterarSenha()">Cancelar</button>
+                <button class="btn-salvar-config" onclick="alterarSenha()">🔐 Alterar Senha</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Recebimento (total ou parcial) -->
+    <div class="modal-overlay" id="modal-recebimento">
+        <div class="modal" style="max-width: 400px;">
+            <h2>✅ Registrar Recebimento</h2>
+            
+            <p id="recebimento-descricao" style="margin-bottom: 10px; font-size: 0.9rem; color: #cbd5f5;"></p>
+            
+            <div class="form-group">
+                <label>Valor recebido</label>
+                <input type="text" id="recebimento-valor" placeholder="Ex: 150,00">
+            </div>
+            
+            <div class="info-box">
+                💡 Você pode receber o valor completo ou apenas uma parte. O restante continua na notinha.
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn-cancelar" onclick="fecharModalRecebimento()">Cancelar</button>
+                <button class="btn-salvar-config" onclick="confirmarRecebimento()">💾 Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
@@ -868,6 +943,7 @@
     <script src="assets/js/acessibilidade.js"></script>
     <script src="assets/js/backup.js"></script>
     <script src="assets/js/busca-global.js"></script>
+    <script src="assets/js/auth.js"></script>
     <script src="assets/js/app.js"></script>
     
     <!-- Service Worker Registration -->

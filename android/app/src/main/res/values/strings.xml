@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Bloco de Cobranças</string>
+    <string name="title_activity_main">Bloco de Cobranças</string>
+    <string name="package_name">com.blocodecobrancas.app</string>
+    <string name="custom_url_scheme">com.blocodecobrancas.app</string>
+</resources>

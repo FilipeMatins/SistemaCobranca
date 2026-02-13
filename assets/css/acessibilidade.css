@@ -709,6 +709,41 @@ html.modo-claro .paginacao button.active {
     border-color: #3b82f6;
 }
 
+/* Botão de logout modo claro */
+html.modo-claro .btn-logout {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #dc2626 !important;
+}
+
+html.modo-claro .btn-logout:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Seção de segurança modo claro */
+html.modo-claro .config-section-divider {
+    background: #e2e8f0 !important;
+}
+
+html.modo-claro .config-seguranca {
+    background: rgba(59, 130, 246, 0.05) !important;
+    border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+html.modo-claro .config-seguranca h3 {
+    color: #2563eb !important;
+}
+
+html.modo-claro .btn-alterar-senha {
+    background: rgba(59, 130, 246, 0.1) !important;
+    color: #2563eb !important;
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+html.modo-claro .btn-alterar-senha:hover {
+    background: rgba(59, 130, 246, 0.2) !important;
+}
+
 /* ==================== ATALHOS DE TECLADO - MODAL ==================== */
 .modal-atalhos {
     max-width: 500px;

@@ -1,14 +1,27 @@
 // ==================== NOTINHAS ====================
+let recebimentoContexto = {
+    notinhaId: null,
+    valorSugerido: 0,
+    origem: null // 'lista' | 'edicao'
+};
 async function salvarNotinha() {
     const empresa = document.getElementById('empresa').value.trim();
     const dataCobrancaPadrao = document.getElementById('data-cobranca').value;
     
     const clientesValidos = clientes.filter(c => c.nome.trim() !== '').map(c => {
         const numParcelas = parseInt(c.parcelas) || 1;
-        // Garante que temos datas para todas as parcelas
-        let datasParcelas = c.datasParcelas || [dataCobrancaPadrao];
-        // Preenche a primeira parcela com data de cobrança se vazio
-        if (!datasParcelas[0]) datasParcelas[0] = dataCobrancaPadrao;
+        
+        // Para clientes à vista (1 parcela): usa SEMPRE a data do campo de cobrança
+        // Para parcelados: usa as datas específicas de cada parcela
+        let datasParcelas;
+        if (numParcelas === 1) {
+            // Cliente à vista: sempre usa a data padrão atual
+            datasParcelas = [dataCobrancaPadrao];
+        } else {
+            // Parcelado: usa as datas específicas, garantindo que a primeira tenha valor
+            datasParcelas = c.datasParcelas || [];
+            if (!datasParcelas[0]) datasParcelas[0] = dataCobrancaPadrao;
+        }
         
         return {
             nome: c.nome,
@@ -72,10 +85,91 @@ async function carregarNotinhas() {
     }
 }
 
+function abrirModalRecebimento(notinhaId, valorSugerido, descricao) {
+    recebimentoContexto.notinhaId = notinhaId;
+    recebimentoContexto.valorSugerido = valorSugerido;
+    recebimentoContexto.origem = descricao;
+    
+    const overlay = document.getElementById('modal-recebimento');
+    const input = document.getElementById('recebimento-valor');
+    const texto = document.getElementById('recebimento-descricao');
+    
+    if (!overlay || !input || !texto) return;
+    
+    texto.textContent = descricao;
+    input.value = formatarValor(valorSugerido).replace('R$ ', '');
+    
+    overlay.classList.add('show');
+    input.focus();
+}
+
+function fecharModalRecebimento() {
+    const overlay = document.getElementById('modal-recebimento');
+    if (overlay) {
+        overlay.classList.remove('show');
+    }
+    recebimentoContexto.notinhaId = null;
+    recebimentoContexto.valorSugerido = 0;
+    recebimentoContexto.origem = null;
+}
+
+async function confirmarRecebimento() {
+    const overlay = document.getElementById('modal-recebimento');
+    const input = document.getElementById('recebimento-valor');
+    
+    if (!overlay || !input || !recebimentoContexto.notinhaId) return;
+    
+    const valorStr = input.value.trim();
+    if (!valorStr) {
+        showToast('Informe o valor recebido!', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('api/recebidos.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                id: recebimentoContexto.notinhaId, 
+                acao: 'parcial',
+                valor: valorStr 
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            showToast('✅ Recebimento registrado!');
+            fecharModalRecebimento();
+            // Recarrega dados para refletir no gráfico, recebidos e lista
+            carregarNotinhas();
+            carregarRecebidos();
+            carregarDashboard();
+        } else {
+            showToast(result.error || 'Erro ao registrar recebimento', 'error');
+        }
+    } catch (error) {
+        showToast('Erro de conexão', 'error');
+    }
+}
+
 function calcularTotalGeral() {
     return todasNotinhas.reduce((total, n) => {
         return total + n.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
     }, 0);
+}
+
+// Abrir modal de recebimento a partir da lista de notinhas
+function marcarComoRecebido(id) {
+    const notinha = todasNotinhas.find(n => n.id == id);
+    if (!notinha) return;
+    
+    const total = notinha.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+    const totalRecebido = parseFloat(notinha.total_recebido || 0);
+    const emAberto = Math.max(total - totalRecebido, 0);
+    const descricao = `Valor recebido da notinha da empresa "${notinha.empresa_nome}" (total R$ ${total.toFixed(2).replace('.', ',')}, em aberto R$ ${emAberto.toFixed(2).replace('.', ',')}). Você pode ajustar o valor se recebeu apenas uma parte.`;
+    
+    // Sugere como padrão o valor em aberto (o que falta pagar)
+    abrirModalRecebimento(id, emAberto || total, descricao);
 }
 
 function atualizarContadores() {
@@ -150,7 +244,10 @@ function aplicarFiltros() {
     renderizarNotinhas(filtradas);
 
     const totalFiltrado = filtradas.reduce((total, n) => {
-        return total + n.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+        const totalNotinha = n.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+        const totalRecebido = parseFloat(n.total_recebido || 0);
+        const emAberto = Math.max(totalNotinha - totalRecebido, 0);
+        return total + emAberto;
     }, 0);
     document.getElementById('valor-filtrado').textContent = formatarValor(totalFiltrado);
 }
@@ -223,6 +320,8 @@ function renderizarNotinhas(notinhas) {
 
     container.innerHTML = notinhas.map(n => {
         const total = n.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+        const totalRecebido = parseFloat(n.total_recebido || 0);
+        const emAberto = Math.max(total - totalRecebido, 0);
         const status = getStatus(n.data_cobranca);
         const clientesNomes = n.clientes.map(c => c.nome.split(' ')[0]).join(', ');
         const notinhaJSON = JSON.stringify(n).replace(/'/g, "\\'").replace(/"/g, '&quot;');
@@ -236,7 +335,7 @@ function renderizarNotinhas(notinhas) {
                     </div>
                     <div class="notinha-clientes-preview">${clientesNomes}</div>
                     <div class="notinha-data">${formatarData(n.data_cobranca)}</div>
-                    <div class="notinha-valor">${formatarValor(total)}</div>
+                    <div class="notinha-valor">${formatarValor(emAberto)}</div>
                     <div class="notinha-status">
                         <span class="status-badge ${status.classe}">${status.texto}</span>
                     </div>

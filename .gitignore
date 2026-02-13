@@ -1,7 +1,15 @@
 # Config local (senhas e dados sensíveis)
 config/local.php
 config.php
+config_email.php
 backup_banco.sql
+
+# Arquivos de teste
+teste_*.php
+criar_senha.php
+
+# Logs
+logs/
 
 # IDE
 .idea/
@@ -21,3 +29,12 @@ Thumbs.db
 insert_*.sql
 contatos_temp.txt
 extract_contacts.py
+
+# Node
+node_modules/
+package-lock.json
+
+# Capacitor - builds locais
+android/app/build/
+ios/App/Pods/
+ios/DerivedData/

@@ -7,10 +7,17 @@ use PDO;
 class Notinha
 {
     private PDO $pdo;
+    private ?int $usuarioId = null;
     
-    public function __construct()
+    public function __construct(?int $usuarioId = null)
     {
         $this->pdo = Database::getInstance();
+        $this->usuarioId = $usuarioId;
+    }
+    
+    public function setUsuarioId(int $usuarioId): void
+    {
+        $this->usuarioId = $usuarioId;
     }
     
     public function limparExcluidosAntigos(): void
@@ -23,21 +30,31 @@ class Notinha
     
     public function listarAtivas(): array
     {
-        $stmt = $this->pdo->query("
+        $sql = "
             SELECT 
                 n.id,
                 n.data_cobranca,
                 n.enviada,
                 n.created_at,
                 e.id as empresa_id,
-                e.nome as empresa_nome
+                e.nome as empresa_nome,
+                COALESCE(SUM(nr.valor), 0) as total_recebido
             FROM notinhas n
             JOIN empresas e ON n.empresa_id = e.id
+            LEFT JOIN notinha_recebimentos nr ON nr.notinha_id = n.id
             WHERE n.deleted_at IS NULL 
             AND n.inadimplente_at IS NULL 
             AND n.recebido_at IS NULL
-            ORDER BY n.data_cobranca DESC, n.created_at DESC
-        ");
+        ";
+        
+        if ($this->usuarioId) {
+            $sql .= " AND n.usuario_id = ?";
+            $stmt = $this->pdo->prepare($sql . " GROUP BY n.id, n.data_cobranca, n.enviada, n.created_at, e.id, e.nome ORDER BY n.data_cobranca DESC, n.created_at DESC");
+            $stmt->execute([$this->usuarioId]);
+        } else {
+            $stmt = $this->pdo->query($sql . " GROUP BY n.id, n.data_cobranca, n.enviada, n.created_at, e.id, e.nome ORDER BY n.data_cobranca DESC, n.created_at DESC");
+        }
+        
         $notinhas = $stmt->fetchAll();
         
         foreach ($notinhas as &$notinha) {
@@ -49,7 +66,7 @@ class Notinha
     
     public function listarInadimplentes(): array
     {
-        $stmt = $this->pdo->query("
+        $sql = "
             SELECT 
                 n.id,
                 n.data_cobranca,
@@ -60,8 +77,16 @@ class Notinha
             FROM notinhas n
             JOIN empresas e ON n.empresa_id = e.id
             WHERE n.inadimplente_at IS NOT NULL AND n.deleted_at IS NULL
-            ORDER BY n.inadimplente_at DESC
-        ");
+        ";
+        
+        if ($this->usuarioId) {
+            $sql .= " AND n.usuario_id = ?";
+            $stmt = $this->pdo->prepare($sql . " ORDER BY n.inadimplente_at DESC");
+            $stmt->execute([$this->usuarioId]);
+        } else {
+            $stmt = $this->pdo->query($sql . " ORDER BY n.inadimplente_at DESC");
+        }
+        
         $notinhas = $stmt->fetchAll();
         
         foreach ($notinhas as &$notinha) {
@@ -73,7 +98,7 @@ class Notinha
     
     public function listarExcluidas(): array
     {
-        $stmt = $this->pdo->query("
+        $sql = "
             SELECT 
                 n.id,
                 n.data_cobranca,
@@ -85,8 +110,16 @@ class Notinha
             FROM notinhas n
             JOIN empresas e ON n.empresa_id = e.id
             WHERE n.deleted_at IS NOT NULL
-            ORDER BY n.deleted_at DESC
-        ");
+        ";
+        
+        if ($this->usuarioId) {
+            $sql .= " AND n.usuario_id = ?";
+            $stmt = $this->pdo->prepare($sql . " ORDER BY n.deleted_at DESC");
+            $stmt->execute([$this->usuarioId]);
+        } else {
+            $stmt = $this->pdo->query($sql . " ORDER BY n.deleted_at DESC");
+        }
+        
         $notinhas = $stmt->fetchAll();
         
         foreach ($notinhas as &$notinha) {
@@ -122,7 +155,7 @@ class Notinha
     
     public function listarTodosClientesExcluidos(): array
     {
-        $stmt = $this->pdo->query("
+        $sql = "
             SELECT 
                 nc.id,
                 nc.nome,
@@ -137,8 +170,16 @@ class Notinha
             JOIN notinhas n ON nc.notinha_id = n.id
             JOIN empresas e ON n.empresa_id = e.id
             WHERE nc.deleted_at IS NOT NULL
-            ORDER BY nc.deleted_at DESC
-        ");
+        ";
+        
+        if ($this->usuarioId) {
+            $sql .= " AND n.usuario_id = ?";
+            $stmt = $this->pdo->prepare($sql . " ORDER BY nc.deleted_at DESC");
+            $stmt->execute([$this->usuarioId]);
+        } else {
+            $stmt = $this->pdo->query($sql . " ORDER BY nc.deleted_at DESC");
+        }
+        
         return $stmt->fetchAll();
     }
     
@@ -185,10 +226,10 @@ class Notinha
     public function criar(int $empresaId, string $dataCobranca, int $numeroParcela = 1, int $totalParcelas = 1, ?int $parcelaOrigem = null): int
     {
         $stmt = $this->pdo->prepare("
-            INSERT INTO notinhas (empresa_id, data_cobranca, numero_parcela, total_parcelas, parcela_origem_id) 
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO notinhas (empresa_id, data_cobranca, numero_parcela, total_parcelas, parcela_origem_id, usuario_id) 
+            VALUES (?, ?, ?, ?, ?, ?)
         ");
-        $stmt->execute([$empresaId, $dataCobranca, $numeroParcela, $totalParcelas, $parcelaOrigem]);
+        $stmt->execute([$empresaId, $dataCobranca, $numeroParcela, $totalParcelas, $parcelaOrigem, $this->usuarioId]);
         return (int) $this->pdo->lastInsertId();
     }
     
@@ -303,21 +344,92 @@ class Notinha
         return (int) $result['total'];
     }
     
+    /**
+     * Registra um recebimento (parcial ou total) para uma notinha.
+     * Também verifica se o total recebido já cobre o valor total e,
+     * em caso afirmativo, marca a notinha como totalmente recebida.
+     */
+    public function registrarRecebimentoParcial(int $notinhaId, float $valor, ?int $clienteId = null): void
+    {
+        if ($valor <= 0) {
+            return;
+        }
+        
+        $stmt = $this->pdo->prepare("
+            INSERT INTO notinha_recebimentos 
+            SET notinha_id = ?, 
+                cliente_id = ?, 
+                usuario_id = ?, 
+                valor = ?, 
+                recebido_em = NOW()
+        ");
+        $stmt->execute([$notinhaId, $clienteId, $this->usuarioId, $valor]);
+        
+        // Verifica se já recebeu tudo desta notinha
+        $totalNotinha = $this->obterTotalNotinha($notinhaId);
+        $totalRecebido = $this->obterTotalRecebidoNotinha($notinhaId);
+        
+        if ($totalRecebido >= $totalNotinha && $totalNotinha > 0) {
+            // Marca como totalmente recebida (mantém compatibilidade com lógica existente)
+            $this->marcarComoRecebido($notinhaId);
+        }
+    }
+    
+    /**
+     * Retorna o valor total (somando clientes) de uma notinha.
+     */
+    public function obterTotalNotinha(int $notinhaId): float
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT COALESCE(SUM(valor), 0) as total
+            FROM notinha_clientes
+            WHERE notinha_id = ?
+        ");
+        $stmt->execute([$notinhaId]);
+        $result = $stmt->fetch();
+        return (float) ($result['total'] ?? 0);
+    }
+    
+    /**
+     * Retorna o total já recebido (somando parciais) de uma notinha.
+     */
+    public function obterTotalRecebidoNotinha(int $notinhaId): float
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT COALESCE(SUM(valor), 0) as total
+            FROM notinha_recebimentos
+            WHERE notinha_id = ?
+        ");
+        $stmt->execute([$notinhaId]);
+        $result = $stmt->fetch();
+        return (float) ($result['total'] ?? 0);
+    }
+    
     public function listarRecebidos(): array
     {
-        $stmt = $this->pdo->query("
+        $sql = "
             SELECT 
                 n.id,
                 n.data_cobranca,
-                n.recebido_at,
+                MAX(nr.recebido_em) as recebido_at,
                 n.created_at,
                 e.id as empresa_id,
-                e.nome as empresa_nome
-            FROM notinhas n
+                e.nome as empresa_nome,
+                COALESCE(SUM(nr.valor), 0) as total_recebido
+            FROM notinha_recebimentos nr
+            JOIN notinhas n ON nr.notinha_id = n.id
             JOIN empresas e ON n.empresa_id = e.id
-            WHERE n.recebido_at IS NOT NULL AND n.deleted_at IS NULL
-            ORDER BY n.recebido_at DESC
-        ");
+            WHERE n.deleted_at IS NULL
+        ";
+        
+        if ($this->usuarioId) {
+            $sql .= " AND nr.usuario_id = ?";
+            $stmt = $this->pdo->prepare($sql . " GROUP BY n.id, n.data_cobranca, n.created_at, e.id, e.nome ORDER BY recebido_at DESC");
+            $stmt->execute([$this->usuarioId]);
+        } else {
+            $stmt = $this->pdo->query($sql . " GROUP BY n.id, n.data_cobranca, n.created_at, e.id, e.nome ORDER BY recebido_at DESC");
+        }
+        
         $notinhas = $stmt->fetchAll();
         
         foreach ($notinhas as &$notinha) {
@@ -329,26 +441,44 @@ class Notinha
     
     public function totalRecebidoMes(): float
     {
-        $stmt = $this->pdo->query("
-            SELECT COALESCE(SUM(nc.valor), 0) as total
-            FROM notinha_clientes nc
-            JOIN notinhas n ON nc.notinha_id = n.id
-            WHERE n.recebido_at IS NOT NULL 
-            AND MONTH(n.recebido_at) = MONTH(CURRENT_DATE())
-            AND YEAR(n.recebido_at) = YEAR(CURRENT_DATE())
-        ");
+        $sql = "
+            SELECT COALESCE(SUM(nr.valor), 0) as total
+            FROM notinha_recebimentos nr
+            JOIN notinhas n ON nr.notinha_id = n.id
+            WHERE MONTH(nr.recebido_em) = MONTH(CURRENT_DATE())
+            AND YEAR(nr.recebido_em) = YEAR(CURRENT_DATE())
+            AND n.deleted_at IS NULL
+        ";
+        
+        if ($this->usuarioId) {
+            $sql .= " AND nr.usuario_id = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$this->usuarioId]);
+        } else {
+            $stmt = $this->pdo->query($sql);
+        }
+        
         $result = $stmt->fetch();
         return (float) $result['total'];
     }
     
     public function totalRecebidoGeral(): float
     {
-        $stmt = $this->pdo->query("
-            SELECT COALESCE(SUM(nc.valor), 0) as total
-            FROM notinha_clientes nc
-            JOIN notinhas n ON nc.notinha_id = n.id
-            WHERE n.recebido_at IS NOT NULL
-        ");
+        $sql = "
+            SELECT COALESCE(SUM(nr.valor), 0) as total
+            FROM notinha_recebimentos nr
+            JOIN notinhas n ON nr.notinha_id = n.id
+            WHERE n.deleted_at IS NULL
+        ";
+        
+        if ($this->usuarioId) {
+            $sql .= " AND nr.usuario_id = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$this->usuarioId]);
+        } else {
+            $stmt = $this->pdo->query($sql);
+        }
+        
         $result = $stmt->fetch();
         return (float) $result['total'];
     }
