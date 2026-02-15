@@ -59,6 +59,7 @@ class Notinha
         
         foreach ($notinhas as &$notinha) {
             $notinha['clientes'] = $this->buscarClientes($notinha['id']);
+            $notinha['total_original'] = $this->obterTotalNotinha($notinha['id']);
         }
         
         return $notinhas;
@@ -364,6 +365,11 @@ class Notinha
                 recebido_em = NOW()
         ");
         $stmt->execute([$notinhaId, $clienteId, $this->usuarioId, $valor]);
+        
+        // Se recebeu de um cliente específico (pela edição), marca esse cliente como recebido (sai da lista)
+        if ($clienteId !== null) {
+            $this->marcarClienteRecebido($clienteId);
+        }
         
         // Verifica se já recebeu tudo desta notinha
         $totalNotinha = $this->obterTotalNotinha($notinhaId);

@@ -50,7 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
             
-            $model->registrarRecebimentoParcial($id, $valorNum, null);
+            $clienteId = isset($data['cliente_id']) ? intval($data['cliente_id']) : null;
+            $model->registrarRecebimentoParcial($id, $valorNum, $clienteId);
             echo json_encode(['success' => true]);
         } elseif ($acao === 'receber') {
             // Mantém compatibilidade com fluxo antigo (recebimento total direto)

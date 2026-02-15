@@ -226,9 +226,9 @@ async function marcarClienteRecebido(clienteId) {
     const notinhaId = notinhaIdEdicao;
     if (!notinhaId) return;
     
-    const descricao = `Valor recebido do cliente "${cliente.nome}" na notinha da empresa "${document.getElementById('editar-empresa').value}". Você pode ajustar o valor se recebeu apenas uma parte.`;
+    const descricao = `Valor recebido do cliente "${cliente.nome}" na notinha da empresa "${document.getElementById('editar-empresa').value}". O nome dele sairá da notinha após confirmar.`;
     
-    abrirModalRecebimento(notinhaId, valorNumero, descricao);
+    abrirModalRecebimento(notinhaId, valorNumero, descricao, clienteId);
 }
 
 async function salvarEdicao() {

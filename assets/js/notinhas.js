@@ -2,7 +2,8 @@
 let recebimentoContexto = {
     notinhaId: null,
     valorSugerido: 0,
-    origem: null // 'lista' | 'edicao'
+    origem: null,
+    clienteId: null // quando recebe de um cliente na edição, para ele sair da lista
 };
 async function salvarNotinha() {
     const empresa = document.getElementById('empresa').value.trim();
@@ -85,10 +86,11 @@ async function carregarNotinhas() {
     }
 }
 
-function abrirModalRecebimento(notinhaId, valorSugerido, descricao) {
+function abrirModalRecebimento(notinhaId, valorSugerido, descricao, clienteId) {
     recebimentoContexto.notinhaId = notinhaId;
     recebimentoContexto.valorSugerido = valorSugerido;
     recebimentoContexto.origem = descricao;
+    recebimentoContexto.clienteId = clienteId || null;
     
     const overlay = document.getElementById('modal-recebimento');
     const input = document.getElementById('recebimento-valor');
@@ -111,6 +113,7 @@ function fecharModalRecebimento() {
     recebimentoContexto.notinhaId = null;
     recebimentoContexto.valorSugerido = 0;
     recebimentoContexto.origem = null;
+    recebimentoContexto.clienteId = null;
 }
 
 async function confirmarRecebimento() {
@@ -126,21 +129,23 @@ async function confirmarRecebimento() {
     }
     
     try {
+        const body = { id: recebimentoContexto.notinhaId, acao: 'parcial', valor: valorStr };
+        if (recebimentoContexto.clienteId) body.cliente_id = recebimentoContexto.clienteId;
+        
         const response = await fetch('api/recebidos.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                id: recebimentoContexto.notinhaId, 
-                acao: 'parcial',
-                valor: valorStr 
-            })
+            body: JSON.stringify(body)
         });
         
         const result = await response.json();
         if (result.success) {
             showToast('✅ Recebimento registrado!');
+            if (recebimentoContexto.clienteId && typeof notinhaIdEdicao !== 'undefined' && notinhaIdEdicao === recebimentoContexto.notinhaId) {
+                clientesEdicao = clientesEdicao.filter(c => c.id != recebimentoContexto.clienteId);
+                renderizarClientesEdicao();
+            }
             fecharModalRecebimento();
-            // Recarrega dados para refletir no gráfico, recebidos e lista
             carregarNotinhas();
             carregarRecebidos();
             carregarDashboard();
@@ -154,22 +159,23 @@ async function confirmarRecebimento() {
 
 function calcularTotalGeral() {
     return todasNotinhas.reduce((total, n) => {
-        return total + n.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+        const totalOriginal = parseFloat(n.total_original || 0) || n.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+        const totalRecebido = parseFloat(n.total_recebido || 0);
+        return total + Math.max(totalOriginal - totalRecebido, 0);
     }, 0);
 }
 
-// Abrir modal de recebimento a partir da lista de notinhas
+// Abrir modal de recebimento a partir da lista de notinhas (não passa clienteId)
 function marcarComoRecebido(id) {
     const notinha = todasNotinhas.find(n => n.id == id);
     if (!notinha) return;
     
-    const total = notinha.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+    const totalOriginal = parseFloat(notinha.total_original || 0) || notinha.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
     const totalRecebido = parseFloat(notinha.total_recebido || 0);
-    const emAberto = Math.max(total - totalRecebido, 0);
-    const descricao = `Valor recebido da notinha da empresa "${notinha.empresa_nome}" (total R$ ${total.toFixed(2).replace('.', ',')}, em aberto R$ ${emAberto.toFixed(2).replace('.', ',')}). Você pode ajustar o valor se recebeu apenas uma parte.`;
+    const emAberto = Math.max(totalOriginal - totalRecebido, 0);
+    const descricao = `Valor recebido da notinha da empresa "${notinha.empresa_nome}" (total R$ ${totalOriginal.toFixed(2).replace('.', ',')}, em aberto R$ ${emAberto.toFixed(2).replace('.', ',')}). Você pode ajustar o valor se recebeu apenas uma parte.`;
     
-    // Sugere como padrão o valor em aberto (o que falta pagar)
-    abrirModalRecebimento(id, emAberto || total, descricao);
+    abrirModalRecebimento(id, emAberto || totalOriginal, descricao);
 }
 
 function atualizarContadores() {
@@ -244,9 +250,9 @@ function aplicarFiltros() {
     renderizarNotinhas(filtradas);
 
     const totalFiltrado = filtradas.reduce((total, n) => {
-        const totalNotinha = n.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+        const totalOriginal = parseFloat(n.total_original || 0) || n.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
         const totalRecebido = parseFloat(n.total_recebido || 0);
-        const emAberto = Math.max(totalNotinha - totalRecebido, 0);
+        const emAberto = Math.max(totalOriginal - totalRecebido, 0);
         return total + emAberto;
     }, 0);
     document.getElementById('valor-filtrado').textContent = formatarValor(totalFiltrado);
@@ -266,8 +272,8 @@ function ordenarNotinhas(notinhas) {
                 valorB = b.data_cobranca;
                 break;
             case 'valor':
-                valorA = a.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
-                valorB = b.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+                valorA = (parseFloat(a.total_original || 0) || a.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0)) - parseFloat(a.total_recebido || 0);
+                valorB = (parseFloat(b.total_original || 0) || b.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0)) - parseFloat(b.total_recebido || 0);
                 break;
             default:
                 valorA = a.data_cobranca;
@@ -319,9 +325,9 @@ function renderizarNotinhas(notinhas) {
     }
 
     container.innerHTML = notinhas.map(n => {
-        const total = n.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+        const totalOriginal = parseFloat(n.total_original || 0) || n.clientes.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
         const totalRecebido = parseFloat(n.total_recebido || 0);
-        const emAberto = Math.max(total - totalRecebido, 0);
+        const emAberto = Math.max(totalOriginal - totalRecebido, 0);
         const status = getStatus(n.data_cobranca);
         const clientesNomes = n.clientes.map(c => c.nome.split(' ')[0]).join(', ');
         const notinhaJSON = JSON.stringify(n).replace(/'/g, "\\'").replace(/"/g, '&quot;');
