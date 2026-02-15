@@ -19,6 +19,15 @@ class Cliente
     {
         $this->usuarioId = $usuarioId;
     }
+
+    /** Evita exibir email no campo telefone (dados antigos gravados por engano). */
+    private static function sanitizarTelefone(?string $telefone): string
+    {
+        if ($telefone === null || $telefone === '') {
+            return '';
+        }
+        return (strpos($telefone, '@') !== false) ? '' : $telefone;
+    }
     
     public function buscar(string $termo = ''): array
     {
@@ -39,7 +48,11 @@ class Cliente
             }
         }
         
-        return $stmt->fetchAll();
+        $lista = $stmt->fetchAll();
+        foreach ($lista as &$row) {
+            $row['telefone'] = self::sanitizarTelefone($row['telefone'] ?? null);
+        }
+        return $lista;
     }
     
     public function buscarPorId(int $id): ?array
@@ -51,7 +64,11 @@ class Cliente
             $stmt = $this->pdo->prepare("SELECT id, nome, telefone FROM clientes WHERE id = ?");
             $stmt->execute([$id]);
         }
-        return $stmt->fetch() ?: null;
+        $row = $stmt->fetch();
+        if ($row) {
+            $row['telefone'] = self::sanitizarTelefone($row['telefone'] ?? null);
+        }
+        return $row ?: null;
     }
     
     public function buscarPorNome(string $nome): ?array
@@ -63,7 +80,11 @@ class Cliente
             $stmt = $this->pdo->prepare("SELECT id, nome, telefone FROM clientes WHERE nome = ?");
             $stmt->execute([$nome]);
         }
-        return $stmt->fetch() ?: null;
+        $row = $stmt->fetch();
+        if ($row) {
+            $row['telefone'] = self::sanitizarTelefone($row['telefone'] ?? null);
+        }
+        return $row ?: null;
     }
     
     public function buscarPorTelefone(string $telefone, int $excluirId = 0): ?array
@@ -90,6 +111,7 @@ class Cliente
     
     public function criar(string $nome, string $telefone = ''): array
     {
+        $telefone = self::sanitizarTelefone($telefone);
         $stmt = $this->pdo->prepare("INSERT INTO clientes (nome, telefone, usuario_id) VALUES (?, ?, ?)");
         $stmt->execute([$nome, $telefone, $this->usuarioId]);
         
@@ -102,6 +124,7 @@ class Cliente
     
     public function atualizar(int $id, string $nome, string $telefone = ''): bool
     {
+        $telefone = self::sanitizarTelefone($telefone);
         if ($this->usuarioId) {
             $stmt = $this->pdo->prepare("UPDATE clientes SET nome = ?, telefone = ? WHERE id = ? AND usuario_id = ?");
             return $stmt->execute([$nome, $telefone, $id, $this->usuarioId]);
@@ -124,6 +147,7 @@ class Cliente
     
     public function salvarOuAtualizar(string $nome, string $telefone): void
     {
+        $telefone = self::sanitizarTelefone($telefone);
         if ($this->usuarioId) {
             // Verifica se já existe com este nome para este usuário
             $stmt = $this->pdo->prepare("SELECT id FROM clientes WHERE nome = ? AND usuario_id = ?");

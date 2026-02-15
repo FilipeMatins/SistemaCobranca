@@ -19,7 +19,16 @@ class Notinha
     {
         $this->usuarioId = $usuarioId;
     }
-    
+
+    /** Evita exibir email no campo telefone (dados antigos gravados por engano). */
+    private static function sanitizarTelefone(?string $telefone): string
+    {
+        if ($telefone === null || $telefone === '') {
+            return '';
+        }
+        return (strpos($telefone, '@') !== false) ? '' : $telefone;
+    }
+
     public function limparExcluidosAntigos(): void
     {
         // Limpa notinhas excluídas há mais de 15 dias
@@ -139,7 +148,11 @@ class Notinha
             ORDER BY id
         ");
         $stmt->execute([$notinhaId]);
-        return $stmt->fetchAll();
+        $lista = $stmt->fetchAll();
+        foreach ($lista as &$row) {
+            $row['telefone'] = self::sanitizarTelefone($row['telefone'] ?? null);
+        }
+        return $lista;
     }
     
     public function buscarClientesExcluidos(int $notinhaId): array
@@ -151,7 +164,11 @@ class Notinha
             ORDER BY deleted_at DESC
         ");
         $stmt->execute([$notinhaId]);
-        return $stmt->fetchAll();
+        $lista = $stmt->fetchAll();
+        foreach ($lista as &$row) {
+            $row['telefone'] = self::sanitizarTelefone($row['telefone'] ?? null);
+        }
+        return $lista;
     }
     
     public function listarTodosClientesExcluidos(): array
@@ -181,7 +198,11 @@ class Notinha
             $stmt = $this->pdo->query($sql . " ORDER BY nc.deleted_at DESC");
         }
         
-        return $stmt->fetchAll();
+        $lista = $stmt->fetchAll();
+        foreach ($lista as &$row) {
+            $row['telefone'] = self::sanitizarTelefone($row['telefone'] ?? null);
+        }
+        return $lista;
     }
     
     public function excluirClientePermanente(int $clienteId): bool
@@ -221,7 +242,11 @@ class Notinha
             WHERE notinha_id = ?
         ");
         $stmt->execute([$notinhaId]);
-        return $stmt->fetchAll();
+        $lista = $stmt->fetchAll();
+        foreach ($lista as &$row) {
+            $row['telefone'] = self::sanitizarTelefone($row['telefone'] ?? null);
+        }
+        return $lista;
     }
     
     public function criar(int $empresaId, string $dataCobranca, int $numeroParcela = 1, int $totalParcelas = 1, ?int $parcelaOrigem = null): int
@@ -245,7 +270,7 @@ class Notinha
             return [
                 'nome' => $c['nome'],
                 'valor' => $valorTotal / $numParcelas,
-                'telefone' => $c['telefone'] ?? ''
+                'telefone' => self::sanitizarTelefone($c['telefone'] ?? null)
             ];
         }, $clientes);
         
@@ -280,6 +305,7 @@ class Notinha
     
     public function adicionarCliente(int $notinhaId, string $nome, float $valor, string $telefone): void
     {
+        $telefone = self::sanitizarTelefone($telefone);
         $stmt = $this->pdo->prepare("
             INSERT INTO notinha_clientes (notinha_id, nome, valor, telefone) 
             VALUES (?, ?, ?, ?)
