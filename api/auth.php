@@ -184,9 +184,10 @@ try {
             if ($resultado) {
                 $novoId = (int) $db->lastInsertId();
                 
-                // Criar configurações padrão para o novo usuário
-                $stmtConfig = $db->prepare("INSERT INTO configuracoes (usuario_id, chave_pix, nome_vendedor, mensagem_padrao) VALUES (?, '', '', 'Olá {nome}! Aqui é {vendedor}, passando para lembrar do pagamento de {valor}. Chave PIX: {pix}')");
-                $stmtConfig->execute([$novoId]);
+                // Criar configurações padrão para o novo usuário (tabela usa chave/valor)
+                $mensagemPadrao = 'Olá {nome}! Aqui é {vendedor}, passando para lembrar do pagamento de {valor}. Chave PIX: {pix}';
+                $stmtConfig = $db->prepare("INSERT INTO configuracoes (usuario_id, chave, valor) VALUES (?, 'chave_pix', ''), (?, 'nome_vendedor', ''), (?, 'mensagem_padrao', ?)");
+                $stmtConfig->execute([$novoId, $novoId, $novoId, $mensagemPadrao]);
                 
                 // Fazer login automático para que as notinhas/dados sejam salvos na conta dela
                 $novoUsuario = ['id' => $novoId, 'nome' => $nome, 'email' => $email];
